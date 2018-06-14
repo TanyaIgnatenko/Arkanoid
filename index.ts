@@ -20,8 +20,28 @@ const rightWallX = canvas.width;
 const topWallY = 0;
 const bottomWallY = canvas.height;
 
+let brickRowCount = 3;
+let brickColumnCount = 8;
+let brickWidth = 75;
+let brickHeight = 20;
+let brickOffsetTop = 30;
+let brickOffsetLeft = 50;
+
 let leftPressed: boolean = false;
 let rightPressed: boolean = false;
+
+interface vector2D {
+    x: number;
+    y: number;
+}
+
+let bricks: Array<Array<vector2D>> = [];
+for (let col = 0; col < brickColumnCount; ++col) {
+    bricks[col] = [];
+    for (let row = 0; row < brickRowCount; ++row) {
+        bricks[col][row] = {x: 0, y: 0};
+    }
+}
 
 function drawBall(x: number, y: number, r: number, ballColor: string): void {
     context.beginPath();
@@ -36,8 +56,23 @@ function drawPaddle(paddleX: number, puddleY: number, puddleWidth: number,
     context.fillRect(paddleX, paddleY, paddleWidth, paddleHeight);
 }
 
+function drawBricks() {
+    for (let col = 0; col < brickColumnCount; ++col) {
+        for (let row = 0; row < brickRowCount; ++row) {
+            let brickX: number = brickOffsetLeft + col * brickWidth;
+            let brickY: number = brickOffsetTop + row * brickHeight;
+            bricks[col][row].x = brickX;
+            bricks[col][row].y = brickY;
+            context.fillStyle = 'yellow';
+            context.fillRect(brickX, brickY, brickWidth, brickHeight);
+            context.strokeRect(brickX, brickY, brickWidth, brickHeight);
+        }
+    }
+}
+
 function draw(): void {
     context.clearRect(0, 0, canvas.width, canvas.height);
+    drawBricks();
     drawBall(ballX, ballY, ballRadius, ballColor);
     drawPaddle(paddleX, paddleY, paddleWidth, paddleHeight, paddleColor);
 }
@@ -96,7 +131,7 @@ function mouseMoveHandler(e: MouseEvent) {
     let mouseX: number = e.clientX - canvas.offsetLeft;
     if (mouseX >= leftWallX + paddleWidth / 2 &&
         mouseX <= rightWallX - paddleWidth / 2) {
-        paddleX = mouseX - paddleWidth/2;
+        paddleX = mouseX - paddleWidth / 2;
     }
 }
 
