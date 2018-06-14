@@ -30,31 +30,35 @@ let brickOffsetLeft = 50;
 let leftPressed: boolean = false;
 let rightPressed: boolean = false;
 
-interface vector2D {
+interface Vector2D {
     x: number;
     y: number;
 }
 
-interface line {
-    startPoint: vector2D,
-    endPoint: vector2D
+interface Line {
+    startPoint: Vector2D,
+    endPoint: Vector2D
 }
 
+interface Brick {
+    topLeftPoint: Vector2D,
+    alive: boolean
+}
 enum CollisionType {
     Vertical = 'Vertical',
     Horizontal = 'Horizontal',
     None = 'None'
 }
 
-let bricks: Array<Array<vector2D>> = [];
+let bricks: Array<Array<Brick>> = [];
 for (let col = 0; col < brickColumnCount; ++col) {
     bricks[col] = [];
     for (let row = 0; row < brickRowCount; ++row) {
-        bricks[col][row] = {x: 0, y: 0};
+        bricks[col][row] = {topLeftPoint: {x: 0, y: 0}, alive: true};
     }
 }
 
-function checkHorizontalCollision(horizontalLine: line, line: line): boolean {
+function checkHorizontalCollision(horizontalLine: Line, line: Line): boolean {
     const x1: number = line.startPoint.x;
     const x2: number = line.endPoint.x;
     const y1: number = line.startPoint.y;
@@ -71,7 +75,7 @@ function checkHorizontalCollision(horizontalLine: line, line: line): boolean {
         intersectionX <= horizontalLine.endPoint.x;
 }
 
-function checkVerticalCollision(verticalLine: line, line: line): boolean {
+function checkVerticalCollision(verticalLine: Line, line: Line): boolean {
     const x1: number = line.startPoint.x;
     const x2: number = line.endPoint.x;
     const y1: number = line.startPoint.y;
@@ -89,23 +93,23 @@ function checkVerticalCollision(verticalLine: line, line: line): boolean {
 }
 
 function calculateBrickCollisionType(brickX: number, brickY: number): CollisionType {
-    const ballSpeedVector: line = {
+    const ballSpeedVector: Line = {
         startPoint: {x: ballX, y: ballY},
         endPoint: {x: ballX + ballSpeedX, y: ballY + ballSpeedY}
     };
-    const brickTopLine: line = {
+    const brickTopLine: Line = {
         startPoint: {x: brickX, y: brickY},
         endPoint: {x: brickX + brickWidth, y: brickY}
     };
-    const brickBottomLine: line = {
+    const brickBottomLine: Line = {
         startPoint: {x: brickX, y: brickY + brickHeight},
         endPoint: {x: brickX + brickWidth, y: brickY + brickHeight}
     };
-    const brickLeftLine: line = {
+    const brickLeftLine: Line = {
         startPoint: {x: brickX, y: brickY},
         endPoint: {x: brickX, y: brickY + brickHeight}
     };
-    const brickRightLine: line = {
+    const brickRightLine: Line = {
         startPoint: {x: brickX + brickWidth, y: brickY},
         endPoint: {x: brickX + brickWidth, y: brickY + brickHeight}
     };
@@ -133,13 +137,15 @@ function drawPaddle(paddleX: number, puddleY: number, puddleWidth: number,
 function drawBricks() {
     for (let col = 0; col < brickColumnCount; ++col) {
         for (let row = 0; row < brickRowCount; ++row) {
-            let brickX: number = brickOffsetLeft + col * brickWidth;
-            let brickY: number = brickOffsetTop + row * brickHeight;
-            bricks[col][row].x = brickX;
-            bricks[col][row].y = brickY;
-            context.fillStyle = 'yellow';
-            context.fillRect(brickX, brickY, brickWidth, brickHeight);
-            context.strokeRect(brickX, brickY, brickWidth, brickHeight);
+            if(bricks[col][row].alive) {
+                let brickX: number = brickOffsetLeft + col * brickWidth;
+                let brickY: number = brickOffsetTop + row * brickHeight;
+                bricks[col][row].topLeftPoint.x = brickX;
+                bricks[col][row].topLeftPoint.y = brickY;
+                context.fillStyle = 'yellow';
+                context.fillRect(brickX, brickY, brickWidth, brickHeight);
+                context.strokeRect(brickX, brickY, brickWidth, brickHeight);
+            }
         }
     }
 }
@@ -173,13 +179,17 @@ function gameLoop(): void {
     //Detect ball and bricks collision
     for(let col = 0; col < brickColumnCount; ++col){
         for(let row = 0; row < brickRowCount; ++row){
-            const collisionType: CollisionType = calculateBrickCollisionType(bricks[col][row].x, bricks[col][row].y);
-            if(collisionType === CollisionType.Vertical){
-                ballSpeedX = -ballSpeedX;
-                console.log("V coll");
-            } else if(collisionType === CollisionType.Horizontal) {
-                ballSpeedY = -ballSpeedY;
-                console.log("H coll");
+            if(bricks[col][row].alive) {
+                const collisionType: CollisionType =
+                    calculateBrickCollisionType(bricks[col][row].topLeftPoint.x, bricks[col][row].topLeftPoint.y);
+
+                if (collisionType === CollisionType.Vertical) {
+                    ballSpeedX = -ballSpeedX;
+                    bricks[col][row].alive = false;
+                } else if (collisionType === CollisionType.Horizontal) {
+                    ballSpeedY = -ballSpeedY;
+                    bricks[col][row].alive = false;
+                }
             }
         }
     }
