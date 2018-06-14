@@ -58,6 +58,8 @@ for (let col = 0; col < brickColumnCount; ++col) {
     }
 }
 
+let score: number = 0;
+
 function checkHorizontalCollision(horizontalSegment: Segment, line: Segment): boolean {
     const x1: number = line.startPoint.x;
     const x2: number = line.endPoint.x;
@@ -150,11 +152,18 @@ function drawBricks() {
     }
 }
 
+function drawScore(): void {
+    context.font = '16px Arial, sans-serif';
+    context.fillStyle = 'white';
+    context.fillText('Score:' + score, 8, 20);
+}
+
 function draw(): void {
     context.clearRect(0, 0, canvas.width, canvas.height);
     drawBricks();
     drawBall(ballX, ballY, ballRadius, ballColor);
     drawPaddle(paddleX, paddleY, paddleWidth, paddleHeight, paddleColor);
+    drawScore();
 }
 
 function gameLoop(): void {
@@ -182,13 +191,13 @@ function gameLoop(): void {
             if(bricks[col][row].alive) {
                 const collisionType: CollisionType =
                     calculateBrickCollisionType(bricks[col][row].topLeftPoint.x, bricks[col][row].topLeftPoint.y);
-
+                if(collisionType === CollisionType.None) continue;
+                bricks[col][row].alive = false;
+                ++score;
                 if (collisionType === CollisionType.Vertical) {
                     ballSpeedX = -ballSpeedX;
-                    bricks[col][row].alive = false;
                 } else if (collisionType === CollisionType.Horizontal) {
                     ballSpeedY = -ballSpeedY;
-                    bricks[col][row].alive = false;
                 }
             }
         }
