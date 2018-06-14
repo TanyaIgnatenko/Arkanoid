@@ -15,6 +15,11 @@ const paddleY: number = canvas.height - paddleHeight - 10;
 const paddleSpeedX: number = 10;
 const paddleColor: string = 'grey';
 
+const leftWallX = 0;
+const rightWallX = canvas.width;
+const topWallY = 0;
+const bottomWallY = canvas.height;
+
 let leftPressed: boolean = false;
 let rightPressed: boolean = false;
 
@@ -35,31 +40,46 @@ function draw(): void {
     context.clearRect(0, 0, canvas.width, canvas.height);
     drawBall(ballX, ballY, ballRadius, ballColor);
     drawPaddle(paddleX, paddleY, paddleWidth, paddleHeight, paddleColor);
+}
 
-    //Detect walls collisions
-    if (ballX + ballSpeedX < ballRadius || ballX + ballSpeedX > canvas.width - ballRadius) {
+function gameLoop(): void {
+    //Detect wall collision
+    if (ballX < leftWallX + ballRadius ||
+        ballX > rightWallX - ballRadius) {
         ballSpeedX = -ballSpeedX;
     }
-    if (ballY + ballSpeedY < ballRadius || ballY + ballSpeedY > canvas.height - ballRadius) {
+    if (ballY < topWallY + ballRadius ||
+        ballY > bottomWallY - ballRadius) {
         ballSpeedY = -ballSpeedY;
     }
-    ballX += ballSpeedX;
-    ballY += ballSpeedY;
+
+    //Detect paddle and ball collision
+    if (ballX > paddleX - ballRadius &&
+        ballX < paddleX + paddleWidth + ballRadius &&
+        ballY > paddleY - ballRadius &&
+        ballY < paddleY + paddleHeight/2) {
+        ballSpeedY = -ballSpeedY;
+    }
 
     //Define paddle position
-    if(leftPressed){
-        paddleX = Math.max(paddleX-paddleSpeedX, 0);
-    } else if(rightPressed){
+    if (leftPressed) {
+        paddleX = Math.max(paddleX - paddleSpeedX, 0);
+    } else if (rightPressed) {
         paddleX = Math.min(paddleX + paddleSpeedX, canvas.width - paddleWidth);
     }
 
-    window.requestAnimationFrame(draw);
+    draw();
+
+    ballX += ballSpeedX;
+    ballY += ballSpeedY;
+
+    window.requestAnimationFrame(gameLoop);
 }
 
 function keyDownHandler(e: KeyboardEvent): void {
     if (e.keyCode === 37) {
         leftPressed = true;
-    } else if(e.keyCode === 39) {
+    } else if (e.keyCode === 39) {
         rightPressed = true;
     }
 }
@@ -67,11 +87,11 @@ function keyDownHandler(e: KeyboardEvent): void {
 function keyUpHandler(e: KeyboardEvent): void {
     if (e.keyCode === 37) {
         leftPressed = false;
-    } else if(e.keyCode === 39) {
+    } else if (e.keyCode === 39) {
         rightPressed = false;
     }
 }
 
 document.addEventListener('keydown', keyDownHandler);
 document.addEventListener('keyup', keyUpHandler);
-window.requestAnimationFrame(draw);
+window.requestAnimationFrame(gameLoop);
