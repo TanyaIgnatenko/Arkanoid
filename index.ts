@@ -57,7 +57,7 @@ function gameLoop(): void {
     if (ballX > paddleX - ballRadius &&
         ballX < paddleX + paddleWidth + ballRadius &&
         ballY > paddleY - ballRadius &&
-        ballY < paddleY + paddleHeight/2) {
+        ballY < paddleY + paddleHeight / 2) {
         ballSpeedY = -ballSpeedY;
     }
 
@@ -92,6 +92,15 @@ function keyUpHandler(e: KeyboardEvent): void {
     }
 }
 
+function mouseMoveHandler(e: MouseEvent) {
+    let mouseX: number = e.clientX - canvas.offsetLeft;
+    if (mouseX >= leftWallX + paddleWidth / 2 &&
+        mouseX <= rightWallX - paddleWidth / 2) {
+        paddleX = mouseX - paddleWidth/2;
+    }
+}
+
 document.addEventListener('keydown', keyDownHandler);
 document.addEventListener('keyup', keyUpHandler);
+document.addEventListener('mousemove', mouseMoveHandler);
 window.requestAnimationFrame(gameLoop);
