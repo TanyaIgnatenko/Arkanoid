@@ -35,7 +35,7 @@ interface Vector2D {
     y: number;
 }
 
-interface Line {
+interface Segment {
     startPoint: Vector2D,
     endPoint: Vector2D
 }
@@ -58,7 +58,7 @@ for (let col = 0; col < brickColumnCount; ++col) {
     }
 }
 
-function checkHorizontalCollision(horizontalLine: Line, line: Line): boolean {
+function checkHorizontalCollision(horizontalSegment: Segment, line: Segment): boolean {
     const x1: number = line.startPoint.x;
     const x2: number = line.endPoint.x;
     const y1: number = line.startPoint.y;
@@ -66,16 +66,16 @@ function checkHorizontalCollision(horizontalLine: Line, line: Line): boolean {
 
     if(y1 === y2) return false;
 
-    const intersectionY: number = horizontalLine.startPoint.y;
+    const intersectionY: number = horizontalSegment.startPoint.y;
     const intersectionX: number = ((x2 - x1) * intersectionY + (x1 * y2 - x2 * y1)) / (y2 - y1);
 
     return (intersectionY <= y1 && intersectionY >= y2 ||
         intersectionY <= y2 && intersectionY >= y1) &&
-        intersectionX >= horizontalLine.startPoint.x &&
-        intersectionX <= horizontalLine.endPoint.x;
+        intersectionX >= horizontalSegment.startPoint.x &&
+        intersectionX <= horizontalSegment.endPoint.x;
 }
 
-function checkVerticalCollision(verticalLine: Line, line: Line): boolean {
+function checkVerticalCollision(verticalSegment: Segment, line: Segment): boolean {
     const x1: number = line.startPoint.x;
     const x2: number = line.endPoint.x;
     const y1: number = line.startPoint.y;
@@ -83,33 +83,33 @@ function checkVerticalCollision(verticalLine: Line, line: Line): boolean {
 
     if(x1 === x2) return false;
 
-    const intersectionX: number = verticalLine.startPoint.x;
+    const intersectionX: number = verticalSegment.startPoint.x;
     const intersectionY: number = ((y1 - y2) * intersectionX + (x1 * y2 - x2 * y1)) / (x1 - x2);
 
     return (intersectionX <= x1 && intersectionX >= x2 ||
         intersectionX <= x2 && intersectionX >= x1) &&
-        intersectionY >= verticalLine.startPoint.y &&
-        intersectionY <= verticalLine.endPoint.y;
+        intersectionY >= verticalSegment.startPoint.y &&
+        intersectionY <= verticalSegment.endPoint.y;
 }
 
 function calculateBrickCollisionType(brickX: number, brickY: number): CollisionType {
-    const ballSpeedVector: Line = {
+    const ballSpeedVector: Segment = {
         startPoint: {x: ballX, y: ballY},
-        endPoint: {x: ballX + ballSpeedX, y: ballY + ballSpeedY}
+        endPoint: {x: ballX - ballSpeedX, y: ballY - ballSpeedY}
     };
-    const brickTopLine: Line = {
+    const brickTopLine: Segment = {
         startPoint: {x: brickX, y: brickY},
         endPoint: {x: brickX + brickWidth, y: brickY}
     };
-    const brickBottomLine: Line = {
+    const brickBottomLine: Segment = {
         startPoint: {x: brickX, y: brickY + brickHeight},
         endPoint: {x: brickX + brickWidth, y: brickY + brickHeight}
     };
-    const brickLeftLine: Line = {
+    const brickLeftLine: Segment = {
         startPoint: {x: brickX, y: brickY},
         endPoint: {x: brickX, y: brickY + brickHeight}
     };
-    const brickRightLine: Line = {
+    const brickRightLine: Segment = {
         startPoint: {x: brickX + brickWidth, y: brickY},
         endPoint: {x: brickX + brickWidth, y: brickY + brickHeight}
     };
