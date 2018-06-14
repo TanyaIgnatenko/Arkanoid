@@ -35,12 +35,86 @@ interface vector2D {
     y: number;
 }
 
+interface line {
+    startPoint: vector2D,
+    endPoint: vector2D
+}
+
+enum CollisionType {
+    Vertical = 'Vertical',
+    Horizontal = 'Horizontal',
+    None = 'None'
+}
+
 let bricks: Array<Array<vector2D>> = [];
 for (let col = 0; col < brickColumnCount; ++col) {
     bricks[col] = [];
     for (let row = 0; row < brickRowCount; ++row) {
         bricks[col][row] = {x: 0, y: 0};
     }
+}
+
+function checkHorizontalCollision(horizontalLine: line, line: line): boolean {
+    const x1: number = line.startPoint.x;
+    const x2: number = line.endPoint.x;
+    const y1: number = line.startPoint.y;
+    const y2: number = line.endPoint.y;
+
+    if(y1 === y2) return false;
+
+    const intersectionY: number = horizontalLine.startPoint.y;
+    const intersectionX: number = ((x2 - x1) * intersectionY + (x1 * y2 - x2 * y1)) / (y2 - y1);
+
+    return (intersectionY <= y1 && intersectionY >= y2 ||
+        intersectionY <= y2 && intersectionY >= y1) &&
+        intersectionX >= horizontalLine.startPoint.x &&
+        intersectionX <= horizontalLine.endPoint.x;
+}
+
+function checkVerticalCollision(verticalLine: line, line: line): boolean {
+    const x1: number = line.startPoint.x;
+    const x2: number = line.endPoint.x;
+    const y1: number = line.startPoint.y;
+    const y2: number = line.endPoint.y;
+
+    if(x1 === x2) return false;
+
+    const intersectionX: number = verticalLine.startPoint.x;
+    const intersectionY: number = ((y1 - y2) * intersectionX + (x1 * y2 - x2 * y1)) / (x1 - x2);
+
+    return (intersectionX <= x1 && intersectionX >= x2 ||
+        intersectionX <= x2 && intersectionX >= x1) &&
+        intersectionY >= verticalLine.startPoint.y &&
+        intersectionY <= verticalLine.endPoint.y;
+}
+
+function calculateBrickCollisionType(brickX: number, brickY: number): CollisionType {
+    const ballSpeedVector: line = {
+        startPoint: {x: ballX, y: ballY},
+        endPoint: {x: ballX + ballSpeedX, y: ballY + ballSpeedY}
+    };
+    const brickTopLine: line = {
+        startPoint: {x: brickX, y: brickY},
+        endPoint: {x: brickX + brickWidth, y: brickY}
+    };
+    const brickBottomLine: line = {
+        startPoint: {x: brickX, y: brickY + brickHeight},
+        endPoint: {x: brickX + brickWidth, y: brickY + brickHeight}
+    };
+    const brickLeftLine: line = {
+        startPoint: {x: brickX, y: brickY},
+        endPoint: {x: brickX, y: brickY + brickHeight}
+    };
+    const brickRightLine: line = {
+        startPoint: {x: brickX + brickWidth, y: brickY},
+        endPoint: {x: brickX + brickWidth, y: brickY + brickHeight}
+    };
+
+    if (checkHorizontalCollision(brickTopLine, ballSpeedVector)) return CollisionType.Horizontal;
+    if (checkHorizontalCollision(brickBottomLine, ballSpeedVector)) return CollisionType.Horizontal;
+    if (checkVerticalCollision(brickLeftLine, ballSpeedVector)) return CollisionType.Vertical;
+    if (checkVerticalCollision(brickRightLine, ballSpeedVector)) return CollisionType.Vertical;
+    return CollisionType.None;
 }
 
 function drawBall(x: number, y: number, r: number, ballColor: string): void {
@@ -94,6 +168,20 @@ function gameLoop(): void {
         ballY > paddleY - ballRadius &&
         ballY < paddleY + paddleHeight / 2) {
         ballSpeedY = -ballSpeedY;
+    }
+
+    //Detect ball and bricks collision
+    for(let col = 0; col < brickColumnCount; ++col){
+        for(let row = 0; row < brickRowCount; ++row){
+            const collisionType: CollisionType = calculateBrickCollisionType(bricks[col][row].x, bricks[col][row].y);
+            if(collisionType === CollisionType.Vertical){
+                ballSpeedX = -ballSpeedX;
+                console.log("V coll");
+            } else if(collisionType === CollisionType.Horizontal) {
+                ballSpeedY = -ballSpeedY;
+                console.log("H coll");
+            }
+        }
     }
 
     //Define paddle position
