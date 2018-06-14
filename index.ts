@@ -59,6 +59,7 @@ for (let col = 0; col < brickColumnCount; ++col) {
 }
 
 let score: number = 0;
+let lives: number = 3;
 
 function checkHorizontalCollision(horizontalSegment: Segment, line: Segment): boolean {
     const x1: number = line.startPoint.x;
@@ -158,12 +159,40 @@ function drawScore(): void {
     context.fillText('Score:' + score, 8, 20);
 }
 
+function drawLivesCount(): void {
+    context.font = '16px Arial, sans-serif';
+    context.fillStyle = 'white';
+    context.fillText('Lives:' + lives, rightWallX - 65, 20);
+}
+
 function draw(): void {
     context.clearRect(0, 0, canvas.width, canvas.height);
     drawBricks();
     drawBall(ballX, ballY, ballRadius, ballColor);
     drawPaddle(paddleX, paddleY, paddleWidth, paddleHeight, paddleColor);
     drawScore();
+    drawLivesCount();
+}
+
+function initBall(): void {
+    ballX = 10;
+    ballY = 10;
+    ballSpeedX = 4;
+    ballSpeedY = 4;
+}
+
+function checkWinCondition(): void {
+    if(score === brickColumnCount * brickRowCount) {
+        alert("Congratulations! You win!:D");
+        document.location.reload(true);
+    }
+}
+
+function checkLoseCondition(): void {
+    if(lives === 0) {
+        alert("GAME OVER");
+        document.location.reload(true);
+    }
 }
 
 function gameLoop(): void {
@@ -171,10 +200,12 @@ function gameLoop(): void {
     if (ballX < leftWallX + ballRadius ||
         ballX > rightWallX - ballRadius) {
         ballSpeedX = -ballSpeedX;
-    }
-    if (ballY < topWallY + ballRadius ||
-        ballY > bottomWallY - ballRadius) {
+    } else if (ballY < topWallY + ballRadius){
         ballSpeedY = -ballSpeedY;
+    } else if( ballY > bottomWallY - ballRadius) {
+        --lives;
+        checkLoseCondition();
+        initBall();
     }
 
     //Detect paddle and ball collision
@@ -191,9 +222,13 @@ function gameLoop(): void {
             if(bricks[col][row].alive) {
                 const collisionType: CollisionType =
                     calculateBrickCollisionType(bricks[col][row].topLeftPoint.x, bricks[col][row].topLeftPoint.y);
+
                 if(collisionType === CollisionType.None) continue;
+
                 bricks[col][row].alive = false;
                 ++score;
+                checkWinCondition();
+
                 if (collisionType === CollisionType.Vertical) {
                     ballSpeedX = -ballSpeedX;
                 } else if (collisionType === CollisionType.Horizontal) {
