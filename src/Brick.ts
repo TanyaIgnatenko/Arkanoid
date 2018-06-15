@@ -1,0 +1,101 @@
+import {CollisionType, Segment, Vector2D} from "./Utils";
+import Ball from "./Ball";
+
+export default class Brick {
+    private topLeftPoint: Vector2D;
+    private width: number = 75;
+    private height: number = 20;
+    private livesCount: number = 1;
+
+    readonly COLOR: string = "#F74F16";
+
+    private _alive: boolean;
+    private _cost: number;
+
+    private drawContext: CanvasRenderingContext2D;
+
+    constructor(drawContext: CanvasRenderingContext2D) {
+        this.drawContext = drawContext;
+    }
+
+    draw(): void {
+        this.drawContext.fillStyle = this.COLOR;
+        this.drawContext.fillRect(this.topLeftPoint.x, this.topLeftPoint.y, this.width, this.height);
+        this.drawContext.strokeRect(this.topLeftPoint.x, this.topLeftPoint.y, this.width, this.height);
+    }
+
+    get cost(): number {
+        return this._cost;
+    }
+
+    get alive(): boolean {
+        return this._alive;
+    }
+
+    set alive(value: boolean) {
+        this._alive = value;
+    }
+
+    private checkHorizontalCollision(horizontalSegment: Segment, line: Segment): boolean {
+        const x1: number = line.startPoint.x;
+        const x2: number = line.endPoint.x;
+        const y1: number = line.startPoint.y;
+        const y2: number = line.endPoint.y;
+
+        if(y1 === y2) return false;
+
+        const intersectionY: number = horizontalSegment.startPoint.y;
+        const intersectionX: number = ((x2 - x1) * intersectionY + (x1 * y2 - x2 * y1)) / (y2 - y1);
+
+        return (intersectionY <= y1 && intersectionY >= y2 ||
+            intersectionY <= y2 && intersectionY >= y1) &&
+            intersectionX >= horizontalSegment.startPoint.x &&
+            intersectionX <= horizontalSegment.endPoint.x;
+    }
+
+    private checkVerticalCollision(verticalSegment: Segment, line: Segment): boolean {
+        const x1: number = line.startPoint.x;
+        const x2: number = line.endPoint.x;
+        const y1: number = line.startPoint.y;
+        const y2: number = line.endPoint.y;
+
+        if(x1 === x2) return false;
+
+        const intersectionX: number = verticalSegment.startPoint.x;
+        const intersectionY: number = ((y1 - y2) * intersectionX + (x1 * y2 - x2 * y1)) / (x1 - x2);
+
+        return (intersectionX <= x1 && intersectionX >= x2 ||
+            intersectionX <= x2 && intersectionX >= x1) &&
+            intersectionY >= verticalSegment.startPoint.y &&
+            intersectionY <= verticalSegment.endPoint.y;
+    }
+
+    private calculateBrickCollisionType(ball: Ball): CollisionType {
+        const ballSpeedVector: Segment = {
+            startPoint: {x: ball.position.x, y: ball.position.y},
+            endPoint: {x: ball.position.x - ball.speedX, y: ball.position.y - ball.speedY}
+        };
+        const brickTopLine: Segment = {
+            startPoint: {x: this.topLeftPoint.x, y: this.topLeftPoint.y},
+            endPoint: {x: this.topLeftPoint.x + this.width, y: this.topLeftPoint.y}
+        };
+        const brickBottomLine: Segment = {
+            startPoint: {x: this.topLeftPoint.x, y: this.topLeftPoint.y + this.height},
+            endPoint: {x: this.topLeftPoint.x + this.width, y: this.topLeftPoint.y + this.height}
+        };
+        const brickLeftLine: Segment = {
+            startPoint: {x: this.topLeftPoint.x, y: this.topLeftPoint.y},
+            endPoint: {x: this.topLeftPoint.x, y: this.topLeftPoint.y + this.height}
+        };
+        const brickRightLine: Segment = {
+            startPoint: {x: this.topLeftPoint.x + this.width, y: this.topLeftPoint.y},
+            endPoint: {x: this.topLeftPoint.x + this.width, y: this.topLeftPoint.y + this.height}
+        };
+
+        if (this.checkHorizontalCollision(brickTopLine, ballSpeedVector)) return CollisionType.Horizontal;
+        if (this.checkHorizontalCollision(brickBottomLine, ballSpeedVector)) return CollisionType.Horizontal;
+        if (this.checkVerticalCollision(brickLeftLine, ballSpeedVector)) return CollisionType.Vertical;
+        if (this.checkVerticalCollision(brickRightLine, ballSpeedVector)) return CollisionType.Vertical;
+        return CollisionType.None;
+    }
+}

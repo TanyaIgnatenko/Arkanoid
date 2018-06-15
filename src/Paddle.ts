@@ -1,0 +1,83 @@
+import {Vector2D} from "./Utils";
+
+export default class Paddle {
+    private _position: Vector2D;
+    private _width: number = 100;
+    private _height: number = 20;
+
+    readonly SPEED_X: number = 10;
+    readonly COLOR: string = '#AC7548';
+
+    private borders: { [key: string]: Vector2D };
+
+    leftPressed: boolean = false;
+    rightPressed: boolean = false;
+    
+    private drawContext: CanvasRenderingContext2D;
+
+    constructor(borders: { [key: string]: Vector2D }, drawContext: CanvasRenderingContext2D) {
+        this.borders = borders;
+        this.drawContext = drawContext;
+
+        this._position.x = (this.borders['RightBorder'].x - this._width) / 2;
+        this._position.y = this.borders['BottomBorder'].y - this._height - 10;
+
+        document.addEventListener('keydown', this.keyDownHandler);
+        document.addEventListener('keyup', this.keyUpHandler);
+        document.addEventListener('mousemove', this.mouseMoveHandler);
+    }
+
+    move(): void {
+        if (this.leftPressed) {
+            this._position.x = Math.max(this._position.x - this.SPEED_X, this.borders['LeftBorder'].x);
+        } else if (this.rightPressed) {
+            this._position.x = Math.min(this._position.x + this.SPEED_X,
+                                        this.borders['RightBorder'].x - this._width);
+        }
+    }
+
+    draw(): void {
+        this.drawContext.fillStyle = this.COLOR;
+        this.drawContext.strokeStyle = "#765031";
+        this.drawContext.lineWidth = 3;
+        this.drawContext.fillRect(this._position.x, this._position.y, this._width, this._height);
+        this.drawContext.strokeRect(this._position.x, this._position.y, this._width, this._height);
+    }
+
+
+    keyDownHandler(e: KeyboardEvent): void {
+        if (e.keyCode === 37) {
+            this.leftPressed = true;
+        } else if (e.keyCode === 39) {
+            this.rightPressed = true;
+        }
+    }
+
+    keyUpHandler(e: KeyboardEvent): void {
+        if (e.keyCode === 37) {
+            this.leftPressed = false;
+        } else if (e.keyCode === 39) {
+            this.rightPressed = false;
+        }
+    }
+
+    mouseMoveHandler(e: MouseEvent) {
+        let mouseX: number = e.clientX - this.drawContext.canvas.offsetLeft;
+        if (mouseX >= this.borders['LeftBorder'].x + this._width / 2 &&
+            mouseX <= this.borders['RightBorder'].x - this._width / 2) {
+            this._position.x = mouseX - this._width / 2;
+        }
+    }
+
+    get position(): Vector2D {
+        return this._position;
+    }
+
+    get width(): number {
+        return this._width;
+    }
+
+    get height(): number {
+        return this._height;
+    }
+}
