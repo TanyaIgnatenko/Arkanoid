@@ -8,19 +8,22 @@ export default class Paddle {
     readonly SPEED_X: number = 10;
     readonly COLOR: string = '#AC7548';
 
-    private borders: { [key: string]: Vector2D };
+    private borders: { leftBorder: number, rightBorder: number, topBorder: number, bottomBorder: number };
 
     leftPressed: boolean = false;
     rightPressed: boolean = false;
-    
+
     private drawContext: CanvasRenderingContext2D;
 
-    constructor(borders: { [key: string]: Vector2D }, drawContext: CanvasRenderingContext2D) {
+    constructor(borders: { leftBorder: number, rightBorder: number, topBorder: number, bottomBorder: number },
+                drawContext: CanvasRenderingContext2D) {
         this.borders = borders;
         this.drawContext = drawContext;
 
-        this._position.x = (this.borders['RightBorder'].x - this._width) / 2;
-        this._position.y = this.borders['BottomBorder'].y - this._height - 10;
+        this._position = {
+            x: (this.borders.rightBorder - this._width) / 2,
+            y: this.borders.bottomBorder - this._height - 10
+        };
 
         document.addEventListener('keydown', this.keyDownHandler);
         document.addEventListener('keyup', this.keyUpHandler);
@@ -29,10 +32,10 @@ export default class Paddle {
 
     move(): void {
         if (this.leftPressed) {
-            this._position.x = Math.max(this._position.x - this.SPEED_X, this.borders['LeftBorder'].x);
+            this._position.x = Math.max(this._position.x - this.SPEED_X, this.borders.leftBorder);
         } else if (this.rightPressed) {
             this._position.x = Math.min(this._position.x + this.SPEED_X,
-                                        this.borders['RightBorder'].x - this._width);
+                this.borders.rightBorder - this._width);
         }
     }
 
@@ -63,8 +66,8 @@ export default class Paddle {
 
     mouseMoveHandler(e: MouseEvent) {
         let mouseX: number = e.clientX - this.drawContext.canvas.offsetLeft;
-        if (mouseX >= this.borders['LeftBorder'].x + this._width / 2 &&
-            mouseX <= this.borders['RightBorder'].x - this._width / 2) {
+        if (mouseX >= this.borders.leftBorder + this._width / 2 &&
+            mouseX <= this.borders.rightBorder - this._width / 2) {
             this._position.x = mouseX - this._width / 2;
         }
     }

@@ -9,27 +9,35 @@ export class Game implements WinLogic {
     readonly BRICKS_START_POSITION: Vector2D = {x: 20, y: 50};
     readonly BALL_START_POSITION: Vector2D = {x: 10, y: 10};
 
-    private canvas: HTMLCanvasElement = <HTMLCanvasElement>document.getElementById('canvas');
-    private context: CanvasRenderingContext2D = this.canvas.getContext('2d');
+    private canvas: HTMLCanvasElement;
+    private context: CanvasRenderingContext2D;
 
-    private ball: Ball = new Ball(this.BALL_START_POSITION, this.context);
-    private borders: { [key: string]: Vector2D };
-    private paddle: Paddle = new Paddle(this.borders, this.context);
-    private bricks: BrickGrid = new BrickGrid(this.BRICKS_START_POSITION, this.BRICK_GRID_SIZE, this.context, this);
+    private ball: Ball;
+    private borders: { leftBorder: number, rightBorder: number, topBorder: number, bottomBorder: number };
+    private paddle: Paddle;
+    private bricks: BrickGrid;
 
     livesCount: number = 3;
     score: number = 0;
     winScore: number;
 
     constructor() {
-        this.borders['LeftBorder'].x = 0;
-        this.borders['RightBorder'].x = this.canvas.width;
-        this.borders['TopBorder'].y = 0;
-        this.borders['BottomBorder'].y = this.canvas.height;
-        this.winScore = this.bricks.cost;
+        this.borders = {
+            leftBorder: 0,
+            rightBorder: this.canvas.width,
+            topBorder: 0,
+            bottomBorder: this.canvas.height
+        };
     }
 
     start() {
+        this.canvas = <HTMLCanvasElement>document.getElementById('canvas');
+        this.context = this.canvas.getContext('2d');
+
+        this.ball = new Ball(this.BALL_START_POSITION, this.context)
+        this.paddle = new Paddle(this.borders, this.context);
+        this.bricks = new BrickGrid(this.BRICKS_START_POSITION, this.BRICK_GRID_SIZE, this.context, this);
+        this.winScore = this.bricks.cost;
         window.requestAnimationFrame(this.nextStep);
     }
 
@@ -42,8 +50,8 @@ export class Game implements WinLogic {
     }
 
     private draw(): void {
-        this.context.clearRect(this.borders['LeftBorder'].x, this.borders['TopBorder'].y,
-                                this.borders['RightBorder'].x, this.borders['BottomBorder'].y);
+        this.context.clearRect(this.borders.leftBorder, this.borders.topBorder,
+            this.borders.rightBorder, this.borders.bottomBorder);
         this.bricks.draw();
         this.paddle.draw();
         this.drawScore();
@@ -52,19 +60,19 @@ export class Game implements WinLogic {
 
     private nextStep(): void {
         this.draw();
-        
+
         //Check Ball and Wall collision
-        if (this.ball.position.x < this.borders['LeftBorder'].x + this.ball.radius ||
-            this.ball.position.x > this.borders['RightBorder'].x- this.ball.radius) {
+        if (this.ball.position.x < this.borders.leftBorder + this.ball.radius ||
+            this.ball.position.x > this.borders.rightBorder - this.ball.radius) {
             this.ball.speedX = -this.ball.speedX;
-        } else if (this.ball.position.y < this.borders['TopBorder'].y + this.ball.radius){
+        } else if (this.ball.position.y < this.borders.topBorder + this.ball.radius) {
             this.ball.speedY = -this.ball.speedY;
-        } else if( this.ball.position.y > this.borders['BottomBorder'].y - this.ball.radius) {
+        } else if (this.ball.position.y > this.borders.bottomBorder - this.ball.radius) {
             --this.livesCount;
             this.checkLoseCondition();
             this.ball.position = this.BALL_START_POSITION;
         }
-        
+
         //Check Ball and Paddle collision
         if (this.ball.position.x > this.paddle.position.x - this.ball.radius &&
             this.ball.position.x < this.paddle.position.x + this.paddle.width + this.ball.radius &&
@@ -72,7 +80,7 @@ export class Game implements WinLogic {
             this.ball.position.y < this.paddle.position.y + this.paddle.height / 2) {
             this.ball.speedY = -this.ball.speedY;
         }
-        
+
         //Check Ball and BricksGrid collision
         this.bricks.checkBallCollisions(this.ball);
 
@@ -105,7 +113,7 @@ export class Game implements WinLogic {
     private drawLivesCount(): void {
         this.context.font = '16px Arial, sans-serif';
         this.context.fillStyle = 'white';
-        this.context.fillText('Lives:' + this.livesCount, this.borders['RightBorder'].x - 65, 20);
+        this.context.fillText('Lives:' + this.livesCount, this.borders.rightBorder - 65, 20);
     }
 
     addPoints(points: number) {
