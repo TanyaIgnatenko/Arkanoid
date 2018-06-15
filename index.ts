@@ -13,7 +13,7 @@ const paddleHeight: number = 20;
 let paddleX: number = (canvas.width - paddleWidth) / 2;
 const paddleY: number = canvas.height - paddleHeight - 10;
 const paddleSpeedX: number = 10;
-const paddleColor: string = 'grey';
+const paddleColor: string = '#AC7548';
 
 const leftWallX = 0;
 const rightWallX = canvas.width;
@@ -127,17 +127,25 @@ function calculateBrickCollisionType(brickX: number, brickY: number): CollisionT
 function drawBall(x: number, y: number, r: number, ballColor: string): void {
     context.beginPath();
     context.arc(x, y, r, 0, 2 * Math.PI, false);
-    context.fillStyle = ballColor;
+    context.fillStyle = "white";
     context.fill();
+    context.strokeStyle = "grey";
+    context.lineWidth = 1;
+    context.stroke();
 }
 
 function drawPaddle(paddleX: number, puddleY: number, puddleWidth: number,
                     puddleHeight: number, paddleColor: string): void {
     context.fillStyle = paddleColor;
+    context.strokeStyle = "#765031";
+    context.lineWidth = 3;
     context.fillRect(paddleX, paddleY, paddleWidth, paddleHeight);
+    context.strokeRect(paddleX, paddleY, paddleWidth, paddleHeight);
 }
 
 function drawBricks() {
+    context.lineWidth = 4;
+    context.strokeStyle = "#eeeeee";
     for (let col = 0; col < brickColumnCount; ++col) {
         for (let row = 0; row < brickRowCount; ++row) {
             if(bricks[col][row].alive) {
@@ -145,7 +153,7 @@ function drawBricks() {
                 let brickY: number = brickOffsetTop + row * brickHeight;
                 bricks[col][row].topLeftPoint.x = brickX;
                 bricks[col][row].topLeftPoint.y = brickY;
-                context.fillStyle = 'yellow';
+                context.fillStyle = '#F74F16';
                 context.fillRect(brickX, brickY, brickWidth, brickHeight);
                 context.strokeRect(brickX, brickY, brickWidth, brickHeight);
             }
