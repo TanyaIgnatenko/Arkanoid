@@ -25,6 +25,10 @@ export default class Paddle {
             y: this.borders.bottomBorder - this._height - 10
         };
 
+        this.mouseMoveHandler = this.mouseMoveHandler.bind(this);
+        this.keyUpHandler = this.keyUpHandler.bind(this);
+        this.keyDownHandler = this.keyDownHandler.bind(this);
+
         document.addEventListener('keydown', this.keyDownHandler);
         document.addEventListener('keyup', this.keyUpHandler);
         document.addEventListener('mousemove', this.mouseMoveHandler);

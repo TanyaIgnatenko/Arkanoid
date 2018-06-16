@@ -8,7 +8,7 @@ export default class BrickGrid {
     private gridSize: GridSize;
     private _cost: number;
     private drawContext: CanvasRenderingContext2D;
-    private bricks: Array<Array<Brick>>;
+    private bricks: Array<Array<Brick>> = new Array<Array<Brick>>();
     private winLogic: WinLogic;
 
     constructor(startPosition: Vector2D, gridSize: GridSize, drawContext: CanvasRenderingContext2D, winLogic: WinLogic) {
@@ -17,13 +17,20 @@ export default class BrickGrid {
         this.drawContext = drawContext;
         this.winLogic = winLogic;
 
+        this.bricks = new Array(this.gridSize.columnCount);
+        for (let row = 0; row < this.gridSize.rowCount; ++row) {
+            this.bricks[row] = new Array(this.gridSize.columnCount);
+            for (let col = 0; col < this.gridSize.columnCount; ++col) {
+                this.bricks[row][col] = new Brick(drawContext);
+            }
+        }
+
         this._cost = 0;
-        for (let col = 0; col < this.gridSize.columnCount; ++col) {
-            for (let row = 0; row < this.gridSize.rowCount; ++row) {
-                bricks[col][row] = new Brick(drawContext);
-                bricks[col][row].topLeftPoint.x = startPosition.x + col * bricks[col][row].width;
-                bricks[col][row].topLeftPoint.y = startPosition.y + row * bricks[col][row].height;
-                this._cost += bricks[col][row].cost;
+        for (let row = 0; row < this.gridSize.rowCount; ++row) {
+            for (let col = 0; col < this.gridSize.columnCount; ++col) {
+                this.bricks[row][col].topLeftPoint.x = startPosition.x + col * this.bricks[row][col].width;
+                this.bricks[row][col].topLeftPoint.y = startPosition.y + row * this.bricks[row][col].height;
+                this._cost += this.bricks[row][col].cost;
             }
         }
     }
@@ -31,24 +38,24 @@ export default class BrickGrid {
     draw(): void {
         this.drawContext.lineWidth = 4;
         this.drawContext.strokeStyle = "#eeeeee";
-        for (let col = 0; col < this.gridSize.columnCount; ++col) {
-            for (let row = 0; row < this.gridSize.rowCount; ++row) {
-                if (bricks[col][row].alive) {
-                    bricks[col][row].draw();
+        for (let row = 0; row < this.gridSize.rowCount; ++row) {
+            for (let col = 0; col < this.gridSize.columnCount; ++col) {
+                if (this.bricks[row][col].alive) {
+                    this.bricks[row][col].draw();
                 }
             }
         }
     }
 
     checkBallCollisions(ball: Ball): void {
-        for(let col = 0; col < this.gridSize.columnCount; ++col){
-            for(let row = 0; row < this.gridSize.rowCount; ++row){
-                if(bricks[col][row].alive) {
-                    const collisionType: CollisionType = bricks[col][row].calculateBallCollisionType(ball);
+        for (let row = 0; row < this.gridSize.rowCount; ++row) {
+            for (let col = 0; col < this.gridSize.columnCount; ++col) {
+                if (this.bricks[row][col].alive) {
+                    const collisionType: CollisionType = this.bricks[row][col].calculateCollisionType(ball);
 
-                    if(collisionType === CollisionType.None) continue;
+                    if (collisionType === CollisionType.None) continue;
 
-                    bricks[col][row].alive = false;
+                    this.bricks[row][col].alive = false;
                     ++this.winLogic.score;
                     this.winLogic.checkWinCondition();
 
