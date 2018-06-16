@@ -6,7 +6,7 @@ import {WinLogic} from "./WinLogic";
 
 export class Game implements WinLogic {
     readonly BRICK_GRID_SIZE: GridSize = {rowCount: 3, columnCount: 8};
-    readonly BRICKS_START_POSITION: Vector2D = {x: 20, y: 50};
+    readonly BRICKS_START_POSITION: Vector2D = {x: 50, y: 30};
     readonly BALL_START_POSITION: Vector2D = {x: 10, y: 10};
 
     private canvas: HTMLCanvasElement;
@@ -22,22 +22,25 @@ export class Game implements WinLogic {
     winScore: number;
 
     constructor() {
-        this.borders = {
-            leftBorder: 0,
-            rightBorder: this.canvas.width,
-            topBorder: 0,
-            bottomBorder: this.canvas.height
-        };
     }
 
     start() {
         this.canvas = <HTMLCanvasElement>document.getElementById('canvas');
         this.context = this.canvas.getContext('2d');
 
-        this.ball = new Ball(this.BALL_START_POSITION, this.context)
+        this.borders = {
+            leftBorder: 0,
+            rightBorder: this.canvas.width,
+            topBorder: 0,
+            bottomBorder: this.canvas.height
+        };
+
+        this.ball = new Ball(this.BALL_START_POSITION, this.context);
         this.paddle = new Paddle(this.borders, this.context);
         this.bricks = new BrickGrid(this.BRICKS_START_POSITION, this.BRICK_GRID_SIZE, this.context, this);
         this.winScore = this.bricks.cost;
+
+        this.nextStep = this.nextStep.bind(this);
         window.requestAnimationFrame(this.nextStep);
     }
 
@@ -54,6 +57,7 @@ export class Game implements WinLogic {
             this.borders.rightBorder, this.borders.bottomBorder);
         this.bricks.draw();
         this.paddle.draw();
+        this.ball.draw();
         this.drawScore();
         this.drawLivesCount();
     }

@@ -2,15 +2,15 @@ import {CollisionType, Segment, Vector2D} from "./Utils";
 import Ball from "./Ball";
 
 export default class Brick {
-    private topLeftPoint: Vector2D;
-    private width: number = 75;
-    private height: number = 20;
+    private _topLeftPoint: Vector2D = {x:0, y:0};
+    private _width: number = 75;
+    private _height: number = 20;
     private livesCount: number = 1;
 
     readonly COLOR: string = "#F74F16";
 
-    private _alive: boolean;
-    private _cost: number;
+    private _alive: boolean = true;
+    private _cost: number = 1;
 
     private drawContext: CanvasRenderingContext2D;
 
@@ -20,8 +20,8 @@ export default class Brick {
 
     draw(): void {
         this.drawContext.fillStyle = this.COLOR;
-        this.drawContext.fillRect(this.topLeftPoint.x, this.topLeftPoint.y, this.width, this.height);
-        this.drawContext.strokeRect(this.topLeftPoint.x, this.topLeftPoint.y, this.width, this.height);
+        this.drawContext.fillRect(this._topLeftPoint.x, this._topLeftPoint.y, this._width, this._height);
+        this.drawContext.strokeRect(this._topLeftPoint.x, this._topLeftPoint.y, this._width, this._height);
     }
 
     get cost(): number {
@@ -34,6 +34,18 @@ export default class Brick {
 
     set alive(value: boolean) {
         this._alive = value;
+    }
+
+    get topLeftPoint(): Vector2D {
+        return this._topLeftPoint;
+    }
+
+    get width(): number {
+        return this._width;
+    }
+
+    get height(): number {
+        return this._height;
     }
 
     private checkHorizontalCollision(horizontalSegment: Segment, line: Segment): boolean {
@@ -70,26 +82,26 @@ export default class Brick {
             intersectionY <= verticalSegment.endPoint.y;
     }
 
-    private calculateBrickCollisionType(ball: Ball): CollisionType {
+    calculateCollisionType(ball: Ball): CollisionType {
         const ballSpeedVector: Segment = {
             startPoint: {x: ball.position.x, y: ball.position.y},
             endPoint: {x: ball.position.x - ball.speedX, y: ball.position.y - ball.speedY}
         };
         const brickTopLine: Segment = {
-            startPoint: {x: this.topLeftPoint.x, y: this.topLeftPoint.y},
-            endPoint: {x: this.topLeftPoint.x + this.width, y: this.topLeftPoint.y}
+            startPoint: {x: this._topLeftPoint.x, y: this._topLeftPoint.y},
+            endPoint: {x: this._topLeftPoint.x + this._width, y: this._topLeftPoint.y}
         };
         const brickBottomLine: Segment = {
-            startPoint: {x: this.topLeftPoint.x, y: this.topLeftPoint.y + this.height},
-            endPoint: {x: this.topLeftPoint.x + this.width, y: this.topLeftPoint.y + this.height}
+            startPoint: {x: this._topLeftPoint.x, y: this._topLeftPoint.y + this._height},
+            endPoint: {x: this._topLeftPoint.x + this._width, y: this._topLeftPoint.y + this._height}
         };
         const brickLeftLine: Segment = {
-            startPoint: {x: this.topLeftPoint.x, y: this.topLeftPoint.y},
-            endPoint: {x: this.topLeftPoint.x, y: this.topLeftPoint.y + this.height}
+            startPoint: {x: this._topLeftPoint.x, y: this._topLeftPoint.y},
+            endPoint: {x: this._topLeftPoint.x, y: this._topLeftPoint.y + this._height}
         };
         const brickRightLine: Segment = {
-            startPoint: {x: this.topLeftPoint.x + this.width, y: this.topLeftPoint.y},
-            endPoint: {x: this.topLeftPoint.x + this.width, y: this.topLeftPoint.y + this.height}
+            startPoint: {x: this._topLeftPoint.x + this._width, y: this._topLeftPoint.y},
+            endPoint: {x: this._topLeftPoint.x + this._width, y: this._topLeftPoint.y + this._height}
         };
 
         if (this.checkHorizontalCollision(brickTopLine, ballSpeedVector)) return CollisionType.Horizontal;
