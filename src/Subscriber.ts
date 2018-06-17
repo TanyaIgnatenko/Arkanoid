@@ -1,7 +1,7 @@
 interface ChangedScoreSubscriber {
-    updateScore(additionalPoints: number);
+    updateScore(additionalPoints: number): void;
 }
 
 interface ChangeLeftBricksCountSubscriber {
-    updateLeftBricksCount(leftBricksCount: number);
+    updateLeftBricksCount(leftBricksCount: number): void;
 }

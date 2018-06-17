@@ -50,20 +50,20 @@ export default class BrickGrid {
         }
     }
 
-    subscribeToChangedScore(subscriber: ChangedScoreSubscriber ) {
+    subscribeToChangedScore(subscriber: ChangedScoreSubscriber): void {
         this.changedScoreSubscribers.push(subscriber);
     }
 
-    unsubscriberToChangedScore(subscriber) {
+    unsubscriberToChangedScore(subscriber): void {
         let idx = this.changedScoreSubscribers.indexOf(subscriber, 0);
         if (idx > -1) this.changedScoreSubscribers.splice(idx, 1);
     }
 
-    subscribeToChangedLeftBricksCount(subscriber: ChangeLeftBricksCountSubscriber) {
+    subscribeToChangedLeftBricksCount(subscriber: ChangeLeftBricksCountSubscriber): void {
         this.changeLeftBricksCountSubscriber.push(subscriber);
     }
 
-    unsubscriberToChangedLeftBricksCount(subscriber) {
+    unsubscriberToChangedLeftBricksCount(subscriber): void {
         let idx = this.changeLeftBricksCountSubscriber.indexOf(subscriber, 0);
         if (idx > -1) this.changeLeftBricksCountSubscriber.splice(idx, 1);
     }
