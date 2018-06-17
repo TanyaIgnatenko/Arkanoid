@@ -4,7 +4,7 @@ import BrickGrid from "./BrickGrid";
 import {GridSize, Vector2D} from "./Utils";
 import {WinLogic} from "./WinLogic";
 
-export class Game implements WinLogic {
+export class Game implements ChangedScoreSubscriber, ChangeLeftBricksCountSubscriber {
     readonly BRICK_GRID_SIZE: GridSize = {rowCount: 3, columnCount: 8};
     readonly BRICKS_START_POSITION: Vector2D = {x: 50, y: 30};
     readonly BALL_START_POSITION: Vector2D = {x: 10, y: 10};
@@ -16,12 +16,21 @@ export class Game implements WinLogic {
     private borders: { leftBorder: number, rightBorder: number, topBorder: number, bottomBorder: number };
     private paddle: Paddle;
     private bricks: BrickGrid;
+    private leftBricksCount: number;
 
     livesCount: number = 3;
     score: number = 0;
-    winScore: number;
 
     constructor() {
+    }
+
+    updateScore(additionalPoints: number) {
+        this.score += additionalPoints;
+    }
+
+    updateLeftBricksCount(leftBricksCount: number) {
+        this.leftBricksCount = leftBricksCount;
+        this.checkWinCondition();
     }
 
     start() {
@@ -37,8 +46,11 @@ export class Game implements WinLogic {
 
         this.ball = new Ball(this.BALL_START_POSITION, this.context);
         this.paddle = new Paddle(this.borders, this.context);
-        this.bricks = new BrickGrid(this.BRICKS_START_POSITION, this.BRICK_GRID_SIZE, this.context, this);
-        this.winScore = this.bricks.cost;
+        this.bricks = new BrickGrid(this.BRICKS_START_POSITION, this.BRICK_GRID_SIZE, this.context);
+
+        this.leftBricksCount = this.bricks.leftBricksCount;
+        this.bricks.subscribeToChangedLeftBricksCount(this);
+        this.bricks.subscribeToChangedScore(this);
 
         this.nextStep = this.nextStep.bind(this);
         window.requestAnimationFrame(this.nextStep);
@@ -54,7 +66,7 @@ export class Game implements WinLogic {
 
     private draw(): void {
         this.context.clearRect(this.borders.leftBorder, this.borders.topBorder,
-            this.borders.rightBorder, this.borders.bottomBorder);
+                               this.borders.rightBorder, this.borders.bottomBorder);
         this.bricks.draw();
         this.paddle.draw();
         this.ball.draw();
@@ -95,7 +107,7 @@ export class Game implements WinLogic {
     }
 
     checkWinCondition(): void {
-        if (this.score === this.winScore) {
+        if (this.leftBricksCount === 0) {
             alert('Congratulations! You win!:D');
             this.restart();
         }
@@ -111,13 +123,13 @@ export class Game implements WinLogic {
     private drawScore(): void {
         this.context.font = '16px Arial, sans-serif';
         this.context.fillStyle = 'white';
-        this.context.fillText('Score:' + this.score, 8, 20);
+        this.context.fillText('Score: ' + this.score, 8, 20);
     }
 
     private drawLivesCount(): void {
         this.context.font = '16px Arial, sans-serif';
         this.context.fillStyle = 'white';
-        this.context.fillText('Lives:' + this.livesCount, this.borders.rightBorder - 65, 20);
+        this.context.fillText('Lives: ' + this.livesCount, this.borders.rightBorder - 65, 20);
     }
 
     addPoints(points: number) {

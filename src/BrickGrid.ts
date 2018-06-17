@@ -9,13 +9,15 @@ export default class BrickGrid {
     private _cost: number;
     private drawContext: CanvasRenderingContext2D;
     private bricks: Array<Array<Brick>> = new Array<Array<Brick>>();
-    private winLogic: WinLogic;
+    private _leftBricksCount: number;
 
-    constructor(startPosition: Vector2D, gridSize: GridSize, drawContext: CanvasRenderingContext2D, winLogic: WinLogic) {
+    private changedScoreSubscribers: ChangedScoreSubscriber[] = [];
+    private changeLeftBricksCountSubscriber: ChangeLeftBricksCountSubscriber[] = [];
+
+    constructor(startPosition: Vector2D, gridSize: GridSize, drawContext: CanvasRenderingContext2D) {
         this.startPosition = startPosition;
         this.gridSize = gridSize;
         this.drawContext = drawContext;
-        this.winLogic = winLogic;
 
         this.bricks = new Array(this.gridSize.columnCount);
         for (let row = 0; row < this.gridSize.rowCount; ++row) {
@@ -33,6 +35,37 @@ export default class BrickGrid {
                 this._cost += this.bricks[row][col].cost;
             }
         }
+        this._leftBricksCount = this.gridSize.rowCount * this.gridSize.columnCount;
+    }
+
+    private notifyAboutChangedScore(additionalPoints: number): void {
+        for(let subscriber of this.changedScoreSubscribers) {
+            subscriber.updateScore(additionalPoints);
+        }
+    }
+
+    private notifyAboutChangedLeftBricksCount(leftBricksCount: number): void {
+        for(let subscriber of this.changeLeftBricksCountSubscriber){
+            subscriber.updateLeftBricksCount(leftBricksCount);
+        }
+    }
+
+    subscribeToChangedScore(subscriber: ChangedScoreSubscriber ) {
+        this.changedScoreSubscribers.push(subscriber);
+    }
+
+    unsubscriberToChangedScore(subscriber) {
+        let idx = this.changedScoreSubscribers.indexOf(subscriber, 0);
+        if (idx > -1) this.changedScoreSubscribers.splice(idx, 1);
+    }
+
+    subscribeToChangedLeftBricksCount(subscriber: ChangeLeftBricksCountSubscriber) {
+        this.changeLeftBricksCountSubscriber.push(subscriber);
+    }
+
+    unsubscriberToChangedLeftBricksCount(subscriber) {
+        let idx = this.changeLeftBricksCountSubscriber.indexOf(subscriber, 0);
+        if (idx > -1) this.changeLeftBricksCountSubscriber.splice(idx, 1);
     }
 
     draw(): void {
@@ -55,9 +88,10 @@ export default class BrickGrid {
 
                     if (collisionType === CollisionType.None) continue;
 
+                    --this._leftBricksCount;
                     this.bricks[row][col].alive = false;
-                    ++this.winLogic.score;
-                    this.winLogic.checkWinCondition();
+                    this.notifyAboutChangedScore(this.bricks[row][col].cost);
+                    this.notifyAboutChangedLeftBricksCount(this._leftBricksCount);
 
                     if (collisionType === CollisionType.Vertical) {
                         ball.speedX = -ball.speedX;
@@ -71,5 +105,9 @@ export default class BrickGrid {
 
     get cost(): number {
         return this._cost;
+    }
+
+    get leftBricksCount(): number {
+        return this._leftBricksCount;
     }
 }
