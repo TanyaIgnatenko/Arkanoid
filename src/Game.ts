@@ -2,9 +2,33 @@ import Ball from "./Ball";
 import Paddle from "./Paddle";
 import BrickGrid from "./BrickGrid";
 import {GridSize, Vector2D} from "./Utils";
-import {WinLogic} from "./WinLogic";
+import {Observer} from "./Observer";
 
-export class Game implements ChangedScoreSubscriber, ChangeLeftBricksCountSubscriber {
+class PointsChangeHandler implements Observer<number> {
+    private onUpdate: (number) => void;
+
+    constructor(onUpdate: (number) => void) {
+        this.onUpdate = onUpdate;
+    }
+
+    update(pointsAdded: number): void {
+        this.onUpdate(pointsAdded);
+    }
+}
+
+class BricksCountChangeHandler implements Observer<number> {
+    private onUpdate: (number) => void;
+
+    constructor(onUpdate: (number) => void) {
+        this.onUpdate = onUpdate;
+    }
+
+    update(bricksLeftCount: number): void {
+        this.onUpdate(bricksLeftCount);
+    }
+}
+
+export class Game {
     readonly BRICK_GRID_SIZE: GridSize = {rowCount: 3, columnCount: 8};
     readonly BRICKS_START_POSITION: Vector2D = {x: 50, y: 30};
     readonly BALL_START_POSITION: Vector2D = {x: 10, y: 10};
@@ -16,21 +40,24 @@ export class Game implements ChangedScoreSubscriber, ChangeLeftBricksCountSubscr
     private borders: { leftBorder: number, rightBorder: number, topBorder: number, bottomBorder: number };
     private paddle: Paddle;
     private bricks: BrickGrid;
-    private leftBricksCount: number;
+    private bricksLeftCount: number;
+
+    private pointsChangeHandler: PointsChangeHandler;
+    private brickCountChangeHandler: BricksCountChangeHandler;
 
     livesCount: number = 3;
     score: number = 0;
 
     constructor() {
-    }
-
-    updateScore(additionalPoints: number) {
-        this.score += additionalPoints;
-    }
-
-    updateLeftBricksCount(leftBricksCount: number) {
-        this.leftBricksCount = leftBricksCount;
-        this.checkWinCondition();
+        this.pointsChangeHandler = new PointsChangeHandler(
+            pointsAdded => this.addPoints(pointsAdded)
+        );
+        this.brickCountChangeHandler = new BricksCountChangeHandler(
+            bricksLeftCount => {
+                this.bricksLeftCount = bricksLeftCount;
+                this.checkWinCondition();
+            }
+        );
     }
 
     start() {
@@ -48,9 +75,9 @@ export class Game implements ChangedScoreSubscriber, ChangeLeftBricksCountSubscr
         this.paddle = new Paddle(this.borders, this.context);
         this.bricks = new BrickGrid(this.BRICKS_START_POSITION, this.BRICK_GRID_SIZE, this.context);
 
-        this.leftBricksCount = this.bricks.leftBricksCount;
-        this.bricks.subscribeToChangedLeftBricksCount(this);
-        this.bricks.subscribeToChangedScore(this);
+        this.bricksLeftCount = this.bricks.bricksLeftCount;
+        this.bricks.pointsChangeNotifier.subscribe(this.pointsChangeHandler);
+        this.bricks.bricksCountChangeNotifier.subscribe(this.brickCountChangeHandler);
 
         this.nextStep = this.nextStep.bind(this);
         window.requestAnimationFrame(this.nextStep);
@@ -66,7 +93,7 @@ export class Game implements ChangedScoreSubscriber, ChangeLeftBricksCountSubscr
 
     private draw(): void {
         this.context.clearRect(this.borders.leftBorder, this.borders.topBorder,
-                               this.borders.rightBorder, this.borders.bottomBorder);
+            this.borders.rightBorder, this.borders.bottomBorder);
         this.bricks.draw();
         this.paddle.draw();
         this.ball.draw();
@@ -107,7 +134,7 @@ export class Game implements ChangedScoreSubscriber, ChangeLeftBricksCountSubscr
     }
 
     checkWinCondition(): void {
-        if (this.leftBricksCount === 0) {
+        if (this.bricksLeftCount === 0) {
             alert('Congratulations! You win!:D');
             this.restart();
         }
@@ -134,9 +161,5 @@ export class Game implements ChangedScoreSubscriber, ChangeLeftBricksCountSubscr
 
     addPoints(points: number) {
         this.score += points;
-    }
-
-    decreaseLives(loseLivesCount: number) {
-        this.livesCount -= loseLivesCount;
     }
 }

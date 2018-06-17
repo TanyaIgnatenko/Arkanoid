@@ -1,18 +1,17 @@
 import {CollisionType, GridSize, Vector2D} from "./Utils";
 import Brick from "./Brick";
-import {WinLogic} from "./WinLogic";
 import Ball from "./Ball";
+import {Observable, ObservableImpl} from "./Observer";
 
 export default class BrickGrid {
     private startPosition: Vector2D;
     private gridSize: GridSize;
-    private _cost: number;
     private drawContext: CanvasRenderingContext2D;
     private bricks: Array<Array<Brick>> = new Array<Array<Brick>>();
-    private _leftBricksCount: number;
+    private _bricksLeftCount: number;
 
-    private changedScoreSubscribers: ChangedScoreSubscriber[] = [];
-    private changeLeftBricksCountSubscriber: ChangeLeftBricksCountSubscriber[] = [];
+    private _pointsChangeNotifier: ObservableImpl<number> = new ObservableImpl<number>();
+    private _bricksCountChangeNotifier: ObservableImpl<number> = new ObservableImpl<number>();
 
     constructor(startPosition: Vector2D, gridSize: GridSize, drawContext: CanvasRenderingContext2D) {
         this.startPosition = startPosition;
@@ -27,45 +26,13 @@ export default class BrickGrid {
             }
         }
 
-        this._cost = 0;
         for (let row = 0; row < this.gridSize.rowCount; ++row) {
             for (let col = 0; col < this.gridSize.columnCount; ++col) {
                 this.bricks[row][col].topLeftPoint.x = startPosition.x + col * this.bricks[row][col].width;
                 this.bricks[row][col].topLeftPoint.y = startPosition.y + row * this.bricks[row][col].height;
-                this._cost += this.bricks[row][col].cost;
             }
         }
-        this._leftBricksCount = this.gridSize.rowCount * this.gridSize.columnCount;
-    }
-
-    private notifyAboutChangedScore(additionalPoints: number): void {
-        for(let subscriber of this.changedScoreSubscribers) {
-            subscriber.updateScore(additionalPoints);
-        }
-    }
-
-    private notifyAboutChangedLeftBricksCount(leftBricksCount: number): void {
-        for(let subscriber of this.changeLeftBricksCountSubscriber){
-            subscriber.updateLeftBricksCount(leftBricksCount);
-        }
-    }
-
-    subscribeToChangedScore(subscriber: ChangedScoreSubscriber): void {
-        this.changedScoreSubscribers.push(subscriber);
-    }
-
-    unsubscriberToChangedScore(subscriber): void {
-        let idx = this.changedScoreSubscribers.indexOf(subscriber, 0);
-        if (idx > -1) this.changedScoreSubscribers.splice(idx, 1);
-    }
-
-    subscribeToChangedLeftBricksCount(subscriber: ChangeLeftBricksCountSubscriber): void {
-        this.changeLeftBricksCountSubscriber.push(subscriber);
-    }
-
-    unsubscriberToChangedLeftBricksCount(subscriber): void {
-        let idx = this.changeLeftBricksCountSubscriber.indexOf(subscriber, 0);
-        if (idx > -1) this.changeLeftBricksCountSubscriber.splice(idx, 1);
+        this._bricksLeftCount = this.gridSize.rowCount * this.gridSize.columnCount;
     }
 
     draw(): void {
@@ -88,10 +55,10 @@ export default class BrickGrid {
 
                     if (collisionType === CollisionType.None) continue;
 
-                    --this._leftBricksCount;
+                    --this._bricksLeftCount;
                     this.bricks[row][col].alive = false;
-                    this.notifyAboutChangedScore(this.bricks[row][col].cost);
-                    this.notifyAboutChangedLeftBricksCount(this._leftBricksCount);
+                    this._pointsChangeNotifier.notify(this.bricks[row][col].cost);
+                    this._bricksCountChangeNotifier.notify(this._bricksLeftCount);
 
                     if (collisionType === CollisionType.Vertical) {
                         ball.speedX = -ball.speedX;
@@ -103,11 +70,15 @@ export default class BrickGrid {
         }
     }
 
-    get cost(): number {
-        return this._cost;
+    get bricksLeftCount(): number {
+        return this._bricksLeftCount;
     }
 
-    get leftBricksCount(): number {
-        return this._leftBricksCount;
+    get pointsChangeNotifier(): Observable<number> {
+        return this._pointsChangeNotifier;
+    }
+
+    get bricksCountChangeNotifier(): Observable<number> {
+        return this._bricksCountChangeNotifier;
     }
 }
