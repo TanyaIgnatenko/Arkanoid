@@ -108,7 +108,8 @@ export class Game {
         if (this.ball.position.x < this.borders.leftBorder + this.ball.radius ||
             this.ball.position.x > this.borders.rightBorder - this.ball.radius) {
             this.ball.speedX = -this.ball.speedX;
-        } else if (this.ball.position.y < this.borders.topBorder + this.ball.radius) {
+        }
+        if (this.ball.position.y < this.borders.topBorder + this.ball.radius) {
             this.ball.speedY = -this.ball.speedY;
         } else if (this.ball.position.y > this.borders.bottomBorder - this.ball.radius) {
             --this.livesCount;
