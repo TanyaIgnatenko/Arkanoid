@@ -30,8 +30,8 @@ class BricksCountChangeHandler implements Observer<number> {
 
 export class Game {
     readonly BRICK_GRID_SIZE: GridSize = {rowCount: 3, columnCount: 8};
-    readonly BRICKS_START_POSITION: Vector2D = {x: 50, y: 30};
-    readonly BALL_START_POSITION: Vector2D = {x: 10, y: 10};
+    readonly BRICKS_START_POSITION: Vector2D = new Vector2D(50, 30);
+    readonly BALL_START_POSITION: Vector2D = new Vector2D(10, 10);
 
     private canvas: HTMLCanvasElement;
     private context: CanvasRenderingContext2D;
@@ -44,6 +44,8 @@ export class Game {
 
     private pointsChangeHandler: PointsChangeHandler;
     private brickCountChangeHandler: BricksCountChangeHandler;
+
+    private lostGame: boolean = false;
 
     livesCount: number = 3;
     score: number = 0;
@@ -88,7 +90,24 @@ export class Game {
     }
 
     restart() {
-        document.location.reload(true);
+        this.lostGame = false;
+        this.livesCount = 3;
+        this.score = 0;
+        this.ball.position = this.BALL_START_POSITION;
+
+        this.bricks.pointsChangeNotifier.unsubscribe(this.pointsChangeHandler);
+        this.bricks.bricksCountChangeNotifier.unsubscribe(this.brickCountChangeHandler);
+        this.bricks = new BrickGrid(this.BRICKS_START_POSITION, this.BRICK_GRID_SIZE, this.context);
+        this.bricks.pointsChangeNotifier.subscribe(this.pointsChangeHandler);
+        this.bricks.bricksCountChangeNotifier.subscribe(this.brickCountChangeHandler);
+        this.bricksLeftCount = this.bricks.bricksLeftCount;
+
+        window.requestAnimationFrame(this.nextStep);
+    }
+
+    private onLose(): void {
+        alert('GAME OVER');
+        this.restart();
     }
 
     private draw(): void {
@@ -103,6 +122,11 @@ export class Game {
 
     private nextStep(): void {
         this.draw();
+
+        if(this.lostGame) {
+            this.onLose();
+            return;
+        }
 
         //Check Ball and Wall collision
         if (this.ball.position.x < this.borders.leftBorder + this.ball.radius ||
@@ -142,8 +166,7 @@ export class Game {
 
     private checkLoseCondition(): void {
         if (this.livesCount === 0) {
-            alert('GAME OVER');
-            this.restart();
+            this.lostGame = true;
         }
     }
 

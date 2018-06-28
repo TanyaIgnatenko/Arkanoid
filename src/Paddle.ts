@@ -20,10 +20,10 @@ export default class Paddle {
         this.borders = borders;
         this.drawContext = drawContext;
 
-        this._position = {
-            x: (this.borders.rightBorder - this._width) / 2,
-            y: this.borders.bottomBorder - this._height - 10
-        };
+        this._position = new Vector2D(
+            (this.borders.rightBorder - this._width) / 2,
+            this.borders.bottomBorder - this._height - 10
+        );
 
         this.mouseMoveHandler = this.mouseMoveHandler.bind(this);
         this.keyUpHandler = this.keyUpHandler.bind(this);
