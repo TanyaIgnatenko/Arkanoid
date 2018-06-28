@@ -2,7 +2,7 @@ import {CollisionType, Segment, Vector2D} from "./Utils";
 import Ball from "./Ball";
 
 export default class Brick {
-    private _topLeftPoint: Vector2D = {x:0, y:0};
+    private _topLeftPoint: Vector2D = new Vector2D(0, 0);
     private _width: number = 75;
     private _height: number = 20;
     private livesCount: number = 1;
@@ -84,24 +84,24 @@ export default class Brick {
 
     calculateCollisionType(ball: Ball): CollisionType {
         const ballSpeedVector: Segment = {
-            startPoint: {x: ball.position.x, y: ball.position.y},
-            endPoint: {x: ball.position.x - ball.speedX, y: ball.position.y - ball.speedY}
+            startPoint: ball.position,
+            endPoint:  new Vector2D(ball.position.x - ball.speedX, ball.position.y - ball.speedY)
         };
         const brickTopLine: Segment = {
-            startPoint: {x: this._topLeftPoint.x, y: this._topLeftPoint.y},
-            endPoint: {x: this._topLeftPoint.x + this._width, y: this._topLeftPoint.y}
+            startPoint: new Vector2D( this._topLeftPoint.x, this._topLeftPoint.y),
+            endPoint: new Vector2D( this._topLeftPoint.x + this._width, this._topLeftPoint.y)
         };
         const brickBottomLine: Segment = {
-            startPoint: {x: this._topLeftPoint.x, y: this._topLeftPoint.y + this._height},
-            endPoint: {x: this._topLeftPoint.x + this._width, y: this._topLeftPoint.y + this._height}
+            startPoint: new Vector2D( this._topLeftPoint.x, this._topLeftPoint.y + this._height),
+            endPoint: new Vector2D( this._topLeftPoint.x + this._width, this._topLeftPoint.y + this._height)
         };
         const brickLeftLine: Segment = {
-            startPoint: {x: this._topLeftPoint.x, y: this._topLeftPoint.y},
-            endPoint: {x: this._topLeftPoint.x, y: this._topLeftPoint.y + this._height}
+            startPoint: this._topLeftPoint,
+            endPoint: new Vector2D( this._topLeftPoint.x, this._topLeftPoint.y + this._height)
         };
         const brickRightLine: Segment = {
-            startPoint: {x: this._topLeftPoint.x + this._width, y: this._topLeftPoint.y},
-            endPoint: {x: this._topLeftPoint.x + this._width, y: this._topLeftPoint.y + this._height}
+            startPoint: new Vector2D( this._topLeftPoint.x + this._width, this._topLeftPoint.y),
+            endPoint: new Vector2D( this._topLeftPoint.x + this._width, this._topLeftPoint.y + this._height)
         };
 
         if (this.checkHorizontalCollision(brickTopLine, ballSpeedVector)) return CollisionType.Horizontal;

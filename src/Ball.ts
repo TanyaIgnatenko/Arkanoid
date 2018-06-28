@@ -11,7 +11,7 @@ export default class Ball {
     readonly COLOR: string = 'white';
 
     constructor(position: Vector2D, drawContext: CanvasRenderingContext2D) {
-        this.position = position;
+        this.position = position.clone();
         this.drawContext = drawContext;
     }
 
@@ -55,6 +55,6 @@ export default class Ball {
     }
 
     set position(value: Vector2D) {
-        this._position = value;
+        this._position = value.clone();
     }
 }
