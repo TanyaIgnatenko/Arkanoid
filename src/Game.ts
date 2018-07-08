@@ -93,6 +93,7 @@ export class Game {
         this.lostGame = false;
         this.livesCount = 3;
         this.score = 0;
+        this.ball.reset();
         this.ball.position = this.BALL_START_POSITION;
 
         this.bricks.pointsChangeNotifier.unsubscribe(this.pointsChangeHandler);
