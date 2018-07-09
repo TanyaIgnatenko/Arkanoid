@@ -133,10 +133,10 @@ export class Game {
         //Check Ball and Wall collision
         if (this.ball.position.x < this.borders.leftBorder + this.ball.radius ||
             this.ball.position.x > this.borders.rightBorder - this.ball.radius) {
-            this.ball.speedX = -this.ball.speedX;
+            this.ball.velocity.x = -this.ball.velocity.x;
         }
         if (this.ball.position.y < this.borders.topBorder + this.ball.radius) {
-            this.ball.speedY = -this.ball.speedY;
+            this.ball.velocity.y = -this.ball.velocity.y;
         } else if (this.ball.position.y > this.borders.bottomBorder - this.ball.radius) {
             --this.livesCount;
             this.checkLoseCondition();
@@ -150,12 +150,11 @@ export class Game {
             this.ball.position.y < this.paddle.position.y + this.paddle.height / 2) {
 
             let diff = this.ball.position.x - (this.paddle.position.x + this.paddle.width / 2);
-            let norm_diff = diff / (this.paddle.width / 2);
+            let normDiff = diff / (this.paddle.width / 2);
             let ballSpeed = this.ball.velocity.length();
-            this.ball.speedX = this.MAGIC_NUMBER * norm_diff;
-            this.ball.speedY = -1;
-            let newBallSpeed = this.ball.velocity.length();
-            this.ball.velocity = this.ball.velocity.multiply(ballSpeed/newBallSpeed);
+            this.ball.velocity.x = this.MAGIC_NUMBER * normDiff;
+            this.ball.velocity.y = -1;
+            this.ball.velocity.changeLength(ballSpeed);
         }
 
         //Check Ball and BricksGrid collision

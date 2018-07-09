@@ -61,9 +61,9 @@ export default class BrickGrid {
                     this._bricksCountChangeNotifier.notify(this._bricksLeftCount);
 
                     if (collisionType === CollisionType.Vertical) {
-                        ball.speedX = -ball.speedX;
+                        ball.velocity.x = -ball.velocity.x;
                     } else if (collisionType === CollisionType.Horizontal) {
-                        ball.speedY = -ball.speedY;
+                        ball.velocity.y = -ball.velocity.y;
                     }
                 }
             }

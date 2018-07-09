@@ -85,7 +85,7 @@ export default class Brick {
     calculateCollisionType(ball: Ball): CollisionType {
         const ballSpeedVector: Segment = {
             startPoint: ball.position,
-            endPoint:  new Vector2D(ball.position.x - ball.speedX, ball.position.y - ball.speedY)
+            endPoint:  new Vector2D(ball.position.x - ball.velocity.x, ball.position.y - ball.velocity.y)
         };
         const brickTopLine: Segment = {
             startPoint: new Vector2D( this._topLeftPoint.x, this._topLeftPoint.y),
