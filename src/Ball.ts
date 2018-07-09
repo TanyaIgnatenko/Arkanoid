@@ -1,10 +1,13 @@
 import {Vector2D} from "./Utils";
 
 export default class Ball {
+    readonly RADIUS: number = 10;
+    readonly SPEED_X: number = 4;
+    readonly SPEED_Y: number = 4;
+
     private _position: Vector2D;
-    private _speedX: number = 4;
-    private _speedY: number = 4;
-    private _radius: number = 10;
+    private _velocity: Vector2D = new Vector2D(this.SPEED_X, this.SPEED_Y);
+    private _radius: number = this.RADIUS;
 
     private drawContext: CanvasRenderingContext2D;
 
@@ -13,6 +16,12 @@ export default class Ball {
     constructor(position: Vector2D, drawContext: CanvasRenderingContext2D) {
         this.position = position.clone();
         this.drawContext = drawContext;
+    }
+
+    reset(): void {
+        this._velocity.x = this.SPEED_X;
+        this._velocity.y = this.SPEED_Y;
+        this._radius = this.RADIUS;
     }
 
     move(): void {
@@ -34,20 +43,28 @@ export default class Ball {
         return this._radius;
     }
 
+    get velocity() : Vector2D {
+        return this._velocity;
+    }
+
     get speedX(): number {
-        return this._speedX;
+        return this._velocity.x;
+    }
+
+    set velocity(vector: Vector2D) {
+        this._velocity = vector;
     }
 
     set speedX(value: number) {
-        this._speedX = value;
+        this._velocity.x = value;
     }
 
     get speedY(): number {
-        return this._speedY;
+        return this._velocity.y;
     }
 
     set speedY(value: number) {
-        this._speedY = value;
+        this._velocity.y = value;
     }
 
     get position(): Vector2D {

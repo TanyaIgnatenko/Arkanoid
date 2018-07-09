@@ -1,13 +1,12 @@
 import {Vector2D} from "./Utils";
 
 export default class Paddle {
-    private _position: Vector2D;
-    private _width: number = 100;
-    private _height: number = 20;
-
     readonly SPEED_X: number = 10;
     readonly COLOR: string = '#AC7548';
 
+    private _position: Vector2D;
+    private _width: number = 100;
+    private _height: number = 20;
     private borders: { leftBorder: number, rightBorder: number, topBorder: number, bottomBorder: number };
 
     leftPressed: boolean = false;

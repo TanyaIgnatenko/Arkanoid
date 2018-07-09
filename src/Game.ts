@@ -32,6 +32,7 @@ export class Game {
     readonly BRICK_GRID_SIZE: GridSize = {rowCount: 3, columnCount: 8};
     readonly BRICKS_START_POSITION: Vector2D = new Vector2D(50, 30);
     readonly BALL_START_POSITION: Vector2D = new Vector2D(10, 10);
+    readonly MAGIC_NUMBER: number = 4.0;
 
     private canvas: HTMLCanvasElement;
     private context: CanvasRenderingContext2D;
@@ -93,6 +94,7 @@ export class Game {
         this.lostGame = false;
         this.livesCount = 3;
         this.score = 0;
+        this.ball.reset();
         this.ball.position = this.BALL_START_POSITION;
 
         this.bricks.pointsChangeNotifier.unsubscribe(this.pointsChangeHandler);
@@ -146,7 +148,14 @@ export class Game {
             this.ball.position.x < this.paddle.position.x + this.paddle.width + this.ball.radius &&
             this.ball.position.y > this.paddle.position.y - this.ball.radius &&
             this.ball.position.y < this.paddle.position.y + this.paddle.height / 2) {
-            this.ball.speedY = -this.ball.speedY;
+
+            let diff = this.ball.position.x - (this.paddle.position.x + this.paddle.width / 2);
+            let norm_diff = diff / (this.paddle.width / 2);
+            let ballSpeed = this.ball.velocity.length();
+            this.ball.speedX = this.MAGIC_NUMBER * norm_diff;
+            this.ball.speedY = -1;
+            let newBallSpeed = this.ball.velocity.length();
+            this.ball.velocity = this.ball.velocity.multiply(ballSpeed/newBallSpeed);
         }
 
         //Check Ball and BricksGrid collision
