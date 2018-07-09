@@ -17,6 +17,18 @@ export class Vector2D {
         return this;
     }
 
+    unit(): Vector2D {
+        let length = this.length();
+        return new Vector2D(this.x / length, this.y / length);
+    }
+
+    changeLength(newLength: number): Vector2D {
+        let length = this.length();
+        this.x *= newLength / length;
+        this.y *= newLength / length;
+        return this;
+    }
+
     clone(): Vector2D {
         return new Vector2D(this.x, this.y);
     }

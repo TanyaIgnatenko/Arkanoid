@@ -25,8 +25,8 @@ export default class Ball {
     }
 
     move(): void {
-        this.position.x += this.speedX;
-        this.position.y += this.speedY;
+        this.position.x += this.velocity.x;
+        this.position.y += this.velocity.y;
     }
     
     draw(): void {
@@ -47,24 +47,8 @@ export default class Ball {
         return this._velocity;
     }
 
-    get speedX(): number {
-        return this._velocity.x;
-    }
-
     set velocity(vector: Vector2D) {
         this._velocity = vector;
-    }
-
-    set speedX(value: number) {
-        this._velocity.x = value;
-    }
-
-    get speedY(): number {
-        return this._velocity.y;
-    }
-
-    set speedY(value: number) {
-        this._velocity.y = value;
     }
 
     get position(): Vector2D {
