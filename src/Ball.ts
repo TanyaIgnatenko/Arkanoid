@@ -6,8 +6,7 @@ export default class Ball {
     readonly SPEED_Y: number = 4;
 
     private _position: Vector2D;
-    private _speedX: number = this.SPEED_X;
-    private _speedY: number = this.SPEED_Y;
+    private _velocity: Vector2D = new Vector2D(this.SPEED_X, this.SPEED_Y);
     private _radius: number = this.RADIUS;
 
     private drawContext: CanvasRenderingContext2D;
@@ -20,8 +19,8 @@ export default class Ball {
     }
 
     reset(): void {
-        this._speedX = this.SPEED_X;
-        this._speedY = this.SPEED_Y;
+        this._velocity.x = this.SPEED_X;
+        this._velocity.y = this.SPEED_Y;
         this._radius = this.RADIUS;
     }
 
@@ -44,20 +43,28 @@ export default class Ball {
         return this._radius;
     }
 
+    get velocity() : Vector2D {
+        return this._velocity;
+    }
+
     get speedX(): number {
-        return this._speedX;
+        return this._velocity.x;
+    }
+
+    set velocity(vector: Vector2D) {
+        this._velocity = vector;
     }
 
     set speedX(value: number) {
-        this._speedX = value;
+        this._velocity.x = value;
     }
 
     get speedY(): number {
-        return this._speedY;
+        return this._velocity.y;
     }
 
     set speedY(value: number) {
-        this._speedY = value;
+        this._velocity.y = value;
     }
 
     get position(): Vector2D {
