@@ -140,59 +140,88 @@ export class Game {
     private nextStep(): void {
         this.draw();
 
-        if(this.lostGame) {
+        if (this.lostGame) {
             this.onLose();
             return;
         }
 
-        if(this.doesBallMove) {
-            //Check Ball and Wall collision
-            if (this.ball.position.x < this.borders.leftBorder + this.ball.radius ||
-                this.ball.position.x > this.borders.rightBorder - this.ball.radius) {
-                this.ball.velocity.x = -this.ball.velocity.x;
+        if (this.doesBallMove) {
+            if (this.checkBallCollisionWithSideBorders()) {
+                this.pushBallFromSideBorders();
             }
-            if (this.ball.position.y < this.borders.topBorder + this.ball.radius) {
-                this.ball.velocity.y = -this.ball.velocity.y;
-            } else if (this.ball.position.y > this.borders.bottomBorder - this.ball.radius) {
-                --this.livesCount;
-                this.checkLoseCondition();
-
-                this.ball.position.x = this.paddle.topCenterPosition.x;
-                this.ball.position.y = this.paddle.topCenterPosition.y - this.ball.radius;
-                this.ball.reset();
-
-                this.doesBallMove = false;
-                document.addEventListener('mouseup', this.mouseUpHandler);
+            if (this.checkBallCollisionWithTopBorder()) {
+                this.pushBallFromTopBorder();
+            } else if (this.checkBallCollisionWithBottomBorder()) {
+                this.loseLive();
             }
 
-            //Check Ball and Paddle collision
-            if (this.ball.position.x > this.paddle.topLeftPosition.x - this.ball.radius &&
-                this.ball.position.x < this.paddle.topLeftPosition.x + this.paddle.width + this.ball.radius &&
-                this.ball.position.y > this.paddle.topLeftPosition.y - this.ball.radius &&
-                this.ball.position.y < this.paddle.topLeftPosition.y + this.paddle.height / 2) {
-
-                let diff = this.ball.position.x - (this.paddle.topLeftPosition.x + this.paddle.width / 2);
-                let normDiff = diff / (this.paddle.width / 2);
-                let ballSpeed = this.ball.velocity.length();
-                this.ball.velocity.x = this.MAGIC_NUMBER * normDiff;
-                this.ball.velocity.y = -1;
-                this.ball.velocity.changeLength(ballSpeed);
+            if(this.checkBallCollisionWithPaddle()) {
+                this.pushBallFromPaddle();
             }
 
-            //Check Ball and BricksGrid collision
             this.bricks.checkBallCollisions(this.ball);
+
+            this.ball.move();
         }
 
-            this.paddle.move();
-            if (!this.doesBallMove) {
-                this.ball.position.x = this.paddle.topCenterPosition.x;
-                this.ball.position.y = this.paddle.topCenterPosition.y - this.ball.radius;
-            } else {
-                this.ball.move();
-            }
-
+        this.paddle.move();
+        if (!this.doesBallMove) this.setBallPositionToPaddleTopCenter();
 
         window.requestAnimationFrame(this.nextStep);
+    }
+
+    private pushBallFromPaddle(): void {
+        let diff = this.ball.position.x - (this.paddle.topLeftPosition.x + this.paddle.width / 2);
+        let normDiff = diff / (this.paddle.width / 2);
+        let ballSpeed = this.ball.velocity.length();
+        this.ball.velocity.x = this.MAGIC_NUMBER * normDiff;
+        this.ball.velocity.y = -1;
+        this.ball.velocity.changeLength(ballSpeed);
+    }
+
+    private checkBallCollisionWithPaddle() : boolean {
+        return this.ball.position.x > this.paddle.topLeftPosition.x - this.ball.radius &&
+        this.ball.position.x < this.paddle.topLeftPosition.x + this.paddle.width + this.ball.radius &&
+        this.ball.position.y > this.paddle.topLeftPosition.y - this.ball.radius &&
+        this.ball.position.y < this.paddle.topLeftPosition.y + this.paddle.height / 2;
+    }
+
+    private checkBallCollisionWithBottomBorder() : boolean {
+        return this.ball.position.y > this.borders.bottomBorder - this.ball.radius;
+    }
+
+    private checkBallCollisionWithSideBorders(): boolean {
+        return this.ball.position.x < this.borders.leftBorder + this.ball.radius ||
+               this.ball.position.x > this.borders.rightBorder - this.ball.radius;
+    }
+
+    private checkBallCollisionWithTopBorder(): boolean {
+        return this.ball.position.y < this.borders.topBorder + this.ball.radius;
+    }
+
+    private pushBallFromSideBorders(): void {
+        this.ball.velocity.x = -this.ball.velocity.x;
+    }
+
+    private pushBallFromTopBorder(): void {
+        this.ball.velocity.y = -this.ball.velocity.y;
+    }
+
+    private setBallPositionToPaddleTopCenter(): void {
+        this.ball.position.x = this.paddle.topCenterPosition.x;
+        this.ball.position.y = this.paddle.topCenterPosition.y - this.ball.radius;
+    }
+
+    private loseLive(): void {
+        --this.livesCount;
+        this.checkLoseCondition();
+
+        this.ball.position.x = this.paddle.topCenterPosition.x;
+        this.ball.position.y = this.paddle.topCenterPosition.y - this.ball.radius;
+        this.ball.reset();
+
+        this.doesBallMove = false;
+        document.addEventListener('mouseup', this.mouseUpHandler);
     }
 
     private checkWinCondition(): void {
@@ -224,7 +253,7 @@ export class Game {
         this.score += points;
     }
 
-    mouseUpHandler (){
+    mouseUpHandler() {
         this.doesBallMove = true;
         document.removeEventListener("mouseup", this.mouseUpHandler);
     }
