@@ -7,8 +7,6 @@ export default class Brick {
     private _height: number = 20;
     private livesCount: number = 1;
 
-    readonly COLOR: string = "#88289f";
-
     private _alive: boolean = true;
     private _cost: number = 1;
 

@@ -159,6 +159,7 @@ export class Game {
 
                 this.ball.position.x = this.paddle.topCenterPosition.x;
                 this.ball.position.y = this.paddle.topCenterPosition.y - this.ball.radius;
+                this.ball.reset();
 
                 this.doesBallMove = false;
                 document.addEventListener('mouseup', this.mouseUpHandler);

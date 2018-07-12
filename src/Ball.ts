@@ -2,11 +2,10 @@ import {SphericalObject, Vector2D} from "./Utils";
 
 export default class Ball implements SphericalObject {
     readonly RADIUS: number = 10;
-    readonly SPEED_X: number = 4;
-    readonly SPEED_Y: number = 4;
+    readonly INITIAL_VELOCITY: Vector2D = new Vector2D(0, 6);
 
     private _position: Vector2D;
-    private _velocity: Vector2D = new Vector2D(this.SPEED_X, this.SPEED_Y);
+    private _velocity: Vector2D = this.INITIAL_VELOCITY;
     private _radius: number = this.RADIUS;
 
     private drawContext: CanvasRenderingContext2D;
@@ -18,8 +17,7 @@ export default class Ball implements SphericalObject {
     }
 
     reset(): void {
-        this._velocity.x = this.SPEED_X;
-        this._velocity.y = this.SPEED_Y;
+        this._velocity = this.INITIAL_VELOCITY;
         this._radius = this.RADIUS;
     }
 
