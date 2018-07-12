@@ -1,6 +1,6 @@
-import {Vector2D} from "./Utils";
+import {SphericalObject, Vector2D} from "./Utils";
 
-export default class Ball {
+export default class Ball implements SphericalObject {
     readonly RADIUS: number = 10;
     readonly SPEED_X: number = 4;
     readonly SPEED_Y: number = 4;
@@ -13,8 +13,7 @@ export default class Ball {
 
     readonly COLOR: string = 'white';
 
-    constructor(position: Vector2D, drawContext: CanvasRenderingContext2D) {
-        this.position = position.clone();
+    constructor(drawContext: CanvasRenderingContext2D) {
         this.drawContext = drawContext;
     }
 

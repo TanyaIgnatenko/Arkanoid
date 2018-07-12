@@ -44,8 +44,14 @@ export interface Segment {
     endPoint: Vector2D
 }
 
+export interface SphericalObject {
+    position: Vector2D,
+    radius: number
+}
+
 export enum CollisionType {
     Vertical = 'Vertical',
     Horizontal = 'Horizontal',
     None = 'None'
 }
+

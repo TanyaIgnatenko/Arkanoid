@@ -1,4 +1,4 @@
-import {CollisionType, GridSize, Vector2D} from "./Utils";
+import {CollisionType, GridSize, SphericalObject, Vector2D} from "./Utils";
 import Brick from "./Brick";
 import Ball from "./Ball";
 import {Observable, ObservableImpl} from "./Observer";
