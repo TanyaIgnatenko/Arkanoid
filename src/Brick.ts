@@ -7,8 +7,6 @@ export default class Brick {
     private _height: number = 20;
     private livesCount: number = 1;
 
-    readonly COLOR: string = "#F74F16";
-
     private _alive: boolean = true;
     private _cost: number = 1;
 
@@ -19,7 +17,11 @@ export default class Brick {
     }
 
     draw(): void {
-        this.drawContext.fillStyle = this.COLOR;
+        let gradient = this.drawContext.createLinearGradient(0,0,640,0);
+        gradient.addColorStop(0,"#AFC7CE");
+        gradient.addColorStop(1,"#1C6074");
+
+        this.drawContext.fillStyle = gradient;
         this.drawContext.fillRect(this._topLeftPoint.x, this._topLeftPoint.y, this._width, this._height);
         this.drawContext.strokeRect(this._topLeftPoint.x, this._topLeftPoint.y, this._width, this._height);
     }
