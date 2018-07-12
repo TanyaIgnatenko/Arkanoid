@@ -4,7 +4,8 @@ export default class Paddle {
     readonly SPEED_X: number = 10;
     readonly COLOR: string = '#AC7548';
 
-    private _position: Vector2D;
+    private _topLeftPosition: Vector2D;
+    private _topCenterPosition: Vector2D;
     private _width: number = 100;
     private _height: number = 20;
     private borders: { leftBorder: number, rightBorder: number, topBorder: number, bottomBorder: number };
@@ -15,12 +16,17 @@ export default class Paddle {
     private drawContext: CanvasRenderingContext2D;
 
     constructor(borders: { leftBorder: number, rightBorder: number, topBorder: number, bottomBorder: number },
-                drawContext: CanvasRenderingContext2D) {
+                drawContext: CanvasRenderingContext2D,) {
         this.borders = borders;
         this.drawContext = drawContext;
 
-        this._position = new Vector2D(
+        this._topLeftPosition = new Vector2D(
             (this.borders.rightBorder - this._width) / 2,
+            this.borders.bottomBorder - this._height - 10
+        );
+
+        this._topCenterPosition = new Vector2D(
+            this.borders.rightBorder / 2,
             this.borders.bottomBorder - this._height - 10
         );
 
@@ -33,21 +39,29 @@ export default class Paddle {
         document.addEventListener('mousemove', this.mouseMoveHandler);
     }
 
+    reset(): void {
+        this._topLeftPosition = new Vector2D(
+            (this.borders.rightBorder - this._width) / 2,
+            this.borders.bottomBorder - this._height - 10
+        );
+    }
+
     move(): void {
         if (this.leftPressed) {
-            this._position.x = Math.max(this._position.x - this.SPEED_X, this.borders.leftBorder);
+            this._topLeftPosition.x = Math.max(this._topLeftPosition.x - this.SPEED_X, this.borders.leftBorder);
         } else if (this.rightPressed) {
-            this._position.x = Math.min(this._position.x + this.SPEED_X,
+            this._topLeftPosition.x = Math.min(this._topLeftPosition.x + this.SPEED_X,
                 this.borders.rightBorder - this._width);
         }
+        this._topCenterPosition.x = this._topLeftPosition.x + this.width/2;
     }
 
     draw(): void {
         this.drawContext.fillStyle = this.COLOR;
         this.drawContext.strokeStyle = "#765031";
         this.drawContext.lineWidth = 3;
-        this.drawContext.fillRect(this._position.x, this._position.y, this._width, this._height);
-        this.drawContext.strokeRect(this._position.x, this._position.y, this._width, this._height);
+        this.drawContext.fillRect(this._topLeftPosition.x, this._topLeftPosition.y, this._width, this._height);
+        this.drawContext.strokeRect(this._topLeftPosition.x, this._topLeftPosition.y, this._width, this._height);
     }
 
 
@@ -71,12 +85,16 @@ export default class Paddle {
         let mouseX: number = e.clientX - this.drawContext.canvas.offsetLeft;
         if (mouseX >= this.borders.leftBorder + this._width / 2 &&
             mouseX <= this.borders.rightBorder - this._width / 2) {
-            this._position.x = mouseX - this._width / 2;
+            this._topLeftPosition.x = mouseX - this._width / 2;
         }
     }
 
-    get position(): Vector2D {
-        return this._position;
+    get topLeftPosition(): Vector2D {
+        return this._topLeftPosition;
+    }
+
+    get topCenterPosition(): Vector2D {
+        return this._topCenterPosition;
     }
 
     get width(): number {
