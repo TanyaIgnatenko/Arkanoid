@@ -29,18 +29,24 @@ class BricksCountChangeHandler implements Observer<number> {
 }
 
 export class Game {
-    private borders: { leftBorder: number, rightBorder: number, topBorder: number, bottomBorder: number };
     readonly BRICK_GRID_SIZE: GridSize = {rowCount: 3, columnCount: 8};
     readonly BRICKS_START_POSITION: Vector2D = new Vector2D(50, 30);
-
     readonly MAGIC_NUMBER: number = 4.0;
-    private canvas: HTMLCanvasElement;
+    private canvas: HTMLCanvasElement = <HTMLCanvasElement>document.getElementById('canvas');
 
-    private context: CanvasRenderingContext2D;
-    private ball: Ball;
-    private paddle: Paddle;
-    private bricks: BrickGrid;
-    private bricksLeftCount: number;
+    private context: CanvasRenderingContext2D = this.canvas.getContext('2d');
+
+    private borders: { leftBorder: number, rightBorder: number, topBorder: number, bottomBorder: number } = {
+        leftBorder: 0,
+        rightBorder: this.canvas.width,
+        topBorder: 0,
+        bottomBorder: this.canvas.height
+    };
+
+    private ball: Ball = new Ball(this.context);
+    private paddle: Paddle = new Paddle(this.borders, this.context);
+    private bricks: BrickGrid = new BrickGrid(this.BRICKS_START_POSITION, this.BRICK_GRID_SIZE, this.context);
+    private bricksLeftCount: number = this.bricks.bricksLeftCount;
 
     private pointsChangeHandler: PointsChangeHandler;
     private brickCountChangeHandler: BricksCountChangeHandler;
@@ -64,35 +70,14 @@ export class Game {
     }
 
     start() {
-        this.canvas = <HTMLCanvasElement>document.getElementById('canvas');
-        this.context = this.canvas.getContext('2d');
+        this.setBallInitialPosition();
 
-        this.borders = {
-            leftBorder: 0,
-            rightBorder: this.canvas.width,
-            topBorder: 0,
-            bottomBorder: this.canvas.height
-        };
-
-        this.paddle = new Paddle(this.borders, this.context);
-
-        this.ball = new Ball(this.context);
-        let ballStartPosition = new Vector2D(
-            this.paddle.topCenterPosition.x,
-            this.paddle.topCenterPosition.y - this.ball.radius
-        );
-        this.ball.position = ballStartPosition;
-
-        this.bricks = new BrickGrid(this.BRICKS_START_POSITION, this.BRICK_GRID_SIZE, this.context);
-
-        this.bricksLeftCount = this.bricks.bricksLeftCount;
-        this.bricks.pointsChangeNotifier.subscribe(this.pointsChangeHandler);
-        this.bricks.bricksCountChangeNotifier.subscribe(this.brickCountChangeHandler);
+        this.subscribeToBricksGridEvents();
 
         this.nextStep = this.nextStep.bind(this);
         this.mouseUpHandler = this.mouseUpHandler.bind(this);
-        document.addEventListener('mouseup', this.mouseUpHandler);
 
+        document.addEventListener('mouseup', this.mouseUpHandler);
         window.requestAnimationFrame(this.nextStep);
     }
 
@@ -127,6 +112,11 @@ export class Game {
         this.restart();
     }
 
+    private subscribeToBricksGridEvents() {
+        this.bricks.pointsChangeNotifier.subscribe(this.pointsChangeHandler);
+        this.bricks.bricksCountChangeNotifier.subscribe(this.brickCountChangeHandler);
+    }
+
     private draw(): void {
         this.context.clearRect(this.borders.leftBorder, this.borders.topBorder,
             this.borders.rightBorder, this.borders.bottomBorder);
@@ -155,7 +145,7 @@ export class Game {
                 this.loseLive();
             }
 
-            if(this.checkBallCollisionWithPaddle()) {
+            if (this.checkBallCollisionWithPaddle()) {
                 this.pushBallFromPaddle();
             }
 
@@ -170,6 +160,14 @@ export class Game {
         window.requestAnimationFrame(this.nextStep);
     }
 
+   private setBallInitialPosition(): void {
+        let ballStartPosition = new Vector2D(
+            this.paddle.topCenterPosition.x,
+            this.paddle.topCenterPosition.y - this.ball.radius
+        );
+        this.ball.position = ballStartPosition;
+    }
+
     private pushBallFromPaddle(): void {
         let diff = this.ball.position.x - (this.paddle.topLeftPosition.x + this.paddle.width / 2);
         let normDiff = diff / (this.paddle.width / 2);
@@ -179,20 +177,20 @@ export class Game {
         this.ball.velocity.changeLength(ballSpeed);
     }
 
-    private checkBallCollisionWithPaddle() : boolean {
+    private checkBallCollisionWithPaddle(): boolean {
         return this.ball.position.x > this.paddle.topLeftPosition.x - this.ball.radius &&
-        this.ball.position.x < this.paddle.topLeftPosition.x + this.paddle.width + this.ball.radius &&
-        this.ball.position.y > this.paddle.topLeftPosition.y - this.ball.radius &&
-        this.ball.position.y < this.paddle.topLeftPosition.y + this.paddle.height / 2;
+            this.ball.position.x < this.paddle.topLeftPosition.x + this.paddle.width + this.ball.radius &&
+            this.ball.position.y > this.paddle.topLeftPosition.y - this.ball.radius &&
+            this.ball.position.y < this.paddle.topLeftPosition.y + this.paddle.height / 2;
     }
 
-    private checkBallCollisionWithBottomBorder() : boolean {
+    private checkBallCollisionWithBottomBorder(): boolean {
         return this.ball.position.y > this.borders.bottomBorder - this.ball.radius;
     }
 
     private checkBallCollisionWithSideBorders(): boolean {
         return this.ball.position.x < this.borders.leftBorder + this.ball.radius ||
-               this.ball.position.x > this.borders.rightBorder - this.ball.radius;
+            this.ball.position.x > this.borders.rightBorder - this.ball.radius;
     }
 
     private checkBallCollisionWithTopBorder(): boolean {
