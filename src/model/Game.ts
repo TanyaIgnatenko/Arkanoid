@@ -14,7 +14,6 @@ export class Game {
     private ball: Ball = new Ball();
     private paddle: Paddle;
     private bricks: BrickGrid = new BrickGrid(this.BRICKS_START_POSITION, this.BRICK_GRID_SIZE);
-    private bricksLeftCount: number = this.bricks.bricksLeftCount;
 
     private pointsChangeHandler: PointsChangeHandler;
     private brickCountChangeHandler: BricksCountChangeHandler;
@@ -29,7 +28,8 @@ export class Game {
     private _scoreChangeNotifier: ObservableImpl<number> = new ObservableImpl<number>();
     private _bricksGridRecoveryNotifier: ObservableImpl<void> = new ObservableImpl<void>();
 
-    private lostGame: boolean = false;
+    private gameFinished: boolean = false;
+    private gameLost: boolean = false;
     private doesBallMove: Boolean = false;
 
     livesCount: number = 3;
@@ -50,7 +50,6 @@ export class Game {
         );
         this.brickCountChangeHandler = new BricksCountChangeHandler(
             bricksLeftCount => {
-                this.bricksLeftCount = bricksLeftCount;
                 this.checkWinCondition();
             }
         );
@@ -108,7 +107,8 @@ export class Game {
     }
 
     restart() {
-        this.lostGame = false;
+        this.gameFinished = false;
+        this.gameLost = false;
         this.doesBallMove = false;
         this.livesCount = 3;
         this.score = 0;
@@ -121,21 +121,14 @@ export class Game {
         this.paddle.reset();
 
         this.bricks.recoverAllBricks();
-        this.bricksLeftCount = this.bricks.bricksLeftCount;
 
         this._scoreChangeNotifier.notify(this.score);
         this._livesCountChangeNotifier.notify(this.livesCount);
         this._ballPositionChangeNotifier.notify(this.ball.position);
         this._paddlePositionChangeNotifier.notify(this.paddle.topLeftPosition);
         this._bricksGridRecoveryNotifier.notify(null);
-        document.addEventListener('mouseup', this.mouseUpHandler);
 
         window.requestAnimationFrame(this.nextStep);
-    }
-
-    private onLose(): void {
-        alert('GAME OVER');
-        this.restart();
     }
 
     private subscribeToBricksGridEvents() {
@@ -144,10 +137,14 @@ export class Game {
         this.bricks.brickDestructionNotifier.subscribe(this.brickDestructionHandler);
     }
 
-
     private nextStep(): void {
-        if (this.lostGame) {
-            this.onLose();
+        if (this.gameFinished) {
+            if(this.gameLost) {
+                // alert('GAME OVER');
+            } else {
+                // alert('Congratulations! You win!:D');
+            }
+            this.restart();
             return;
         }
 
@@ -245,15 +242,16 @@ export class Game {
     }
 
     private checkWinCondition(): void {
-        if (this.bricksLeftCount === 0) {
-            alert('Congratulations! You win!:D');
-            this.restart();
+        if (this.bricks.bricksLeftCount === 0) {
+            // alert('Congratulations! You win!:D');
+            this.gameFinished = true;
         }
     }
 
     private checkLoseCondition(): void {
         if (this.livesCount === 0) {
-            this.lostGame = true;
+            this.gameFinished = true;
+            this.gameLost = true;
         }
     }
 

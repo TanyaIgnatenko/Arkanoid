@@ -31,11 +31,11 @@ export default class BrickGrid {
 
     recoverAllBricks() : void {
         for (let row = 0; row < this.gridSize.rowCount; ++row) {
-            this.bricks[row] = new Array(this.gridSize.columnCount);
             for (let col = 0; col < this.gridSize.columnCount; ++col) {
                 this.bricks[row][col].alive = true;
             }
         }
+        this._bricksLeftCount = this.gridSize.rowCount * this.gridSize.columnCount;
     }
 
     checkBallCollisions(ball: Ball): void {
