@@ -55,3 +55,19 @@ export enum CollisionType {
     None = 'None'
 }
 
+export enum Key {
+    RightArrow = 'RightArrow',
+    LeftArrow = 'LeftArrow',
+    None = 'None'
+}
+
+export enum Direction {
+    Right = 2,
+    Left = 1,
+    None = 0
+}
+
+export interface BrickGridNumber {
+    row: number;
+    col: number;
+}

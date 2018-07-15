@@ -10,21 +10,6 @@ export default class Brick {
     private _alive: boolean = true;
     private _cost: number = 1;
 
-    private drawContext: CanvasRenderingContext2D;
-
-    constructor(drawContext: CanvasRenderingContext2D) {
-        this.drawContext = drawContext;
-    }
-
-    draw(): void {
-        let gradient = this.drawContext.createLinearGradient(0,0,640,0);
-        gradient.addColorStop(0,"#AFC7CE");
-        gradient.addColorStop(1,"#1C6074");
-
-        this.drawContext.fillStyle = gradient;
-        this.drawContext.fillRect(this._topLeftPoint.x, this._topLeftPoint.y, this._width, this._height);
-        this.drawContext.strokeRect(this._topLeftPoint.x, this._topLeftPoint.y, this._width, this._height);
-    }
 
     get cost(): number {
         return this._cost;
