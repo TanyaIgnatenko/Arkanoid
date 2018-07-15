@@ -62,7 +62,6 @@ export class Game {
         this._keyboardEventHandler = new KeyboardEventHandler(
             key => {
                 let direction;
-                console.log(key);
                 switch(key)
                 {
                     case Key.RightArrow:
@@ -121,7 +120,7 @@ export class Game {
         );
         this.paddle.reset();
 
-        this.bricks = new BrickGrid(this.BRICKS_START_POSITION, this.BRICK_GRID_SIZE,);
+        this.bricks.recoverAllBricks();
         this.bricksLeftCount = this.bricks.bricksLeftCount;
 
         this._scoreChangeNotifier.notify(this.score);
@@ -129,6 +128,7 @@ export class Game {
         this._ballPositionChangeNotifier.notify(this.ball.position);
         this._paddlePositionChangeNotifier.notify(this.paddle.topLeftPosition);
         this._bricksGridRecoveryNotifier.notify(null);
+        document.addEventListener('mouseup', this.mouseUpHandler);
 
         window.requestAnimationFrame(this.nextStep);
     }
@@ -345,7 +345,7 @@ class KeyboardEventHandler implements Observer<Key> {
     }
 
     update(pressedKey: Key): void {
-        this.onUpdate(Key);
+        this.onUpdate(pressedKey);
     }
 }
 

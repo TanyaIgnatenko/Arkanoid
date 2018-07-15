@@ -3,7 +3,6 @@ import {Direction, Vector2D} from "./Utils";
 export default class Paddle {
     readonly SPEED_X: number = 10;
 
-    // private _topLeftPosition: Vector2D;
     private _topCenterPosition: Vector2D;
     private _width: number = 100;
     private _height: number = 20;

@@ -170,9 +170,9 @@ export class GameView {
 
     keyDownHandler(e: KeyboardEvent): void {
         if (e.keyCode === 37) {
-            this._keyboardEventNotifier.notify(Key.RightArrow);
-        } else if (e.keyCode === 39) {
             this._keyboardEventNotifier.notify(Key.LeftArrow);
+        } else if (e.keyCode === 39) {
+            this._keyboardEventNotifier.notify(Key.RightArrow);
         }
     }
 

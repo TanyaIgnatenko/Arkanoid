@@ -22,16 +22,20 @@ export default class BrickGrid {
             this.bricks[row] = new Array(this.gridSize.columnCount);
             for (let col = 0; col < this.gridSize.columnCount; ++col) {
                 this.bricks[row][col] = new Brick();
-            }
-        }
-
-        for (let row = 0; row < this.gridSize.rowCount; ++row) {
-            for (let col = 0; col < this.gridSize.columnCount; ++col) {
                 this.bricks[row][col].topLeftPoint.x = startPosition.x + col * this.bricks[row][col].width;
                 this.bricks[row][col].topLeftPoint.y = startPosition.y + row * this.bricks[row][col].height;
             }
         }
         this._bricksLeftCount = this.gridSize.rowCount * this.gridSize.columnCount;
+    }
+
+    recoverAllBricks() : void {
+        for (let row = 0; row < this.gridSize.rowCount; ++row) {
+            this.bricks[row] = new Array(this.gridSize.columnCount);
+            for (let col = 0; col < this.gridSize.columnCount; ++col) {
+                this.bricks[row][col].alive = true;
+            }
+        }
     }
 
     checkBallCollisions(ball: Ball): void {
