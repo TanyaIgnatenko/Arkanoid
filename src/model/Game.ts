@@ -62,6 +62,7 @@ export class Game {
         this._keyboardEventHandler = new KeyboardEventHandler(
             key => {
                 let direction;
+                console.log(key);
                 switch(key)
                 {
                     case Key.RightArrow:

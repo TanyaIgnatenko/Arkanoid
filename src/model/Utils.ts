@@ -50,21 +50,21 @@ export interface SphericalObject {
 }
 
 export enum CollisionType {
-    Vertical = 'Vertical',
-    Horizontal = 'Horizontal',
-    None = 'None'
+    Vertical,
+    Horizontal,
+    None
 }
 
 export enum Key {
-    RightArrow = 'RightArrow',
-    LeftArrow = 'LeftArrow',
-    None = 'None'
+    RightArrow,
+    LeftArrow,
+    None
 }
 
 export enum Direction {
-    Right = 2,
-    Left = 1,
-    None = 0
+    Right,
+    Left,
+    None
 }
 
 export interface BrickGridNumber {
