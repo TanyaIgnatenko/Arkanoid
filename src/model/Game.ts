@@ -114,11 +114,11 @@ export class Game {
         this.score = 0;
 
         this.ball.reset();
+        this.paddle.reset();
         this.ball.position = new Vector2D(
             this.paddle.topCenterPosition.x,
             this.paddle.topCenterPosition.y - this.ball.radius
         );
-        this.paddle.reset();
 
         this.bricks.recoverAllBricks();
 
@@ -127,6 +127,8 @@ export class Game {
         this._ballPositionChangeNotifier.notify(this.ball.position);
         this._paddlePositionChangeNotifier.notify(this.paddle.topLeftPosition);
         this._bricksGridRecoveryNotifier.notify(null);
+
+        document.addEventListener("mouseup", this.mouseUpHandler);
 
         window.requestAnimationFrame(this.nextStep);
     }

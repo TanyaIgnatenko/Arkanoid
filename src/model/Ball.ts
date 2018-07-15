@@ -5,11 +5,11 @@ export default class Ball implements SphericalObject {
     readonly INITIAL_VELOCITY: Vector2D = new Vector2D(0, 6);
 
     private _position: Vector2D;
-    private _velocity: Vector2D = this.INITIAL_VELOCITY;
+    private _velocity: Vector2D = this.INITIAL_VELOCITY.clone();
     private _radius: number = this.RADIUS;
 
     reset(): void {
-        this._velocity = this.INITIAL_VELOCITY;
+        this._velocity = this.INITIAL_VELOCITY.clone();
         this._radius = this.RADIUS;
     }
 
