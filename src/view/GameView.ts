@@ -6,7 +6,7 @@ import {BricksGridView} from "./BricksGridView";
 
 export class GameView {
     readonly BRICK_GRID_SIZE: GridSize = {rowCount: 3, columnCount: 8};
-    readonly BRICKS_START_POSITION: Vector2D = new Vector2D(50, 30);
+    readonly BRICKS_START_POSITION: Vector2D = new Vector2D(50, 40);
 
     private canvas: HTMLCanvasElement;
     private context: CanvasRenderingContext2D;
@@ -46,7 +46,7 @@ export class GameView {
         this.borders = {
             leftBorder: 0,
             rightBorder: this._width,
-            topBorder: 0,
+            topBorder: 30,
             bottomBorder: this._height
         };
 

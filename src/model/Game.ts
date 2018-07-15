@@ -6,7 +6,7 @@ import {Observable, ObservableImpl, Observer} from "./Observer";
 
 export class Game {
     readonly BRICK_GRID_SIZE: GridSize = {rowCount: 3, columnCount: 8};
-    readonly BRICKS_START_POSITION: Vector2D = new Vector2D(50, 30);
+    readonly BRICKS_START_POSITION: Vector2D = new Vector2D(50, 40);
     readonly MAGIC_NUMBER: number = 4.0;
 
     private borders: { leftBorder: number, rightBorder: number, topBorder: number, bottomBorder: number };
@@ -39,7 +39,7 @@ export class Game {
         this.borders = {
             leftBorder: 0,
             rightBorder: width,
-            topBorder: 0,
+            topBorder: 30,
             bottomBorder: height
         };
 
