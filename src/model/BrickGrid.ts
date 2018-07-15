@@ -62,6 +62,7 @@ export default class BrickGrid {
                     } else if(collisionType === CollisionType.Corner) {
                         ball.velocity = ball.velocity.multiply(-1);
                     }
+                    return;
                 }
             }
         }
