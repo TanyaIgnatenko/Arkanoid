@@ -1,4 +1,4 @@
-import {BrickGridNumber, CollisionType, GridSize, SphericalObject, Vector2D} from "./Utils";
+import {BrickGridNumber, CollisionType, GridSize, Vector2D} from "./Utils";
 import Brick from "./Brick";
 import Ball from "./Ball";
 import {Observable, ObservableImpl} from "./Observer";
@@ -17,13 +17,16 @@ export default class BrickGrid {
         this.startPosition = startPosition;
         this.gridSize = gridSize;
 
+        const brickWidth:number = 75;
+        const brickHeight:number = 20;
+
         this.bricks = new Array(this.gridSize.rowCount);
         for (let row = 0; row < this.gridSize.rowCount; ++row) {
             this.bricks[row] = new Array(this.gridSize.columnCount);
             for (let col = 0; col < this.gridSize.columnCount; ++col) {
-                this.bricks[row][col] = new Brick();
-                this.bricks[row][col].topLeftPoint.x = startPosition.x + col * this.bricks[row][col].width;
-                this.bricks[row][col].topLeftPoint.y = startPosition.y + row * this.bricks[row][col].height;
+                this.bricks[row][col] = new Brick(new Vector2D(startPosition.x + col * brickWidth,
+                                                               startPosition.y + row * brickHeight),
+                                                  brickWidth, brickHeight);
             }
         }
         this._bricksLeftCount = this.gridSize.rowCount * this.gridSize.columnCount;
@@ -53,9 +56,11 @@ export default class BrickGrid {
                     this._brickDestructionNotifier.notify({row, col});
 
                     if (collisionType === CollisionType.Vertical) {
-                        ball.velocity.x = -ball.velocity.x;
+                        ball.velocity = new Vector2D(-ball.velocity.x, ball.velocity.y);
                     } else if (collisionType === CollisionType.Horizontal) {
-                        ball.velocity.y = -ball.velocity.y;
+                        ball.velocity = new Vector2D(ball.velocity.x, -ball.velocity.y);
+                    } else if(collisionType === CollisionType.Corner) {
+                        ball.velocity = ball.velocity.multiply(-1);
                     }
                 }
             }

@@ -11,6 +11,20 @@ export class Vector2D {
         return Math.sqrt(this.x * this.x + this.y * this.y);
     }
 
+    distance(other: Vector2D): number {
+        const dx = this.x - other.x;
+        const dy = this.y - other.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    plus(vec: Vector2D): Vector2D {
+        return new Vector2D(this.x + vec.x, this.y + vec.y);
+    }
+
+    minus(vec: Vector2D): Vector2D {
+        return new Vector2D(this.x - vec.x, this.y - vec.y);
+    }
+
     multiply(scalar: number): Vector2D {
         this.x *= scalar;
         this.y *= scalar;
@@ -52,6 +66,7 @@ export interface SphericalObject {
 export enum CollisionType {
     Vertical,
     Horizontal,
+    Corner,
     None
 }
 
