@@ -122,10 +122,7 @@ export class GameView {
     }
 
     private drawScore(score: number): void {
-        this.context.clearRect(this.scorePositionBottomLeft.x,
-                            this.scorePositionBottomLeft.y - this.scoreTextHeight,
-                               this.scoreTextWidth, this.scoreTextHeight);
-
+        this.context.clearRect(0, 0, this._width/2, 30);
         this.context.fillStyle = 'rgba(36, 41, 46, 0.6)';
         this.context.fillRect(0, 0, this._width/2, 30);
         this.context.font = '14px Arial, sans-serif';
@@ -134,10 +131,7 @@ export class GameView {
     }
 
     private drawLivesCount(livesCount: number): void {
-        this.context.clearRect(this.livesCountPositionBottomLeft.x,
-                            this.livesCountPositionBottomLeft.y - this.livesCountTextHeight,
-                               this.livesCountTextWidth, this.livesCountTextHeight);
-
+        this.context.clearRect(this._width/2, 0, this._width/2, 30);
         this.context.fillStyle =  'rgba(36, 41, 46, 0.6)';
         this.context.fillRect(this._width/2, 0, this._width/2, 30);
         this.context.font = '14px Arial, sans-serif';

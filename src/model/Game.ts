@@ -207,7 +207,7 @@ export class Game {
     }
 
     private checkBallCollisionWithBottomBorder(): boolean {
-        return this.ball.position.y > this.borders.bottomBorder - this.ball.radius;
+        return this.ball.position.y >= this.borders.bottomBorder - this.ball.radius;
     }
 
     private checkBallCollisionWithSideBorders(): boolean {
