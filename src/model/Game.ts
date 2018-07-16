@@ -40,7 +40,7 @@ export class Game {
             leftBorder: 0,
             rightBorder: width,
             topBorder: 30,
-            bottomBorder: height
+            bottomBorder: height - 20
         };
 
         this.paddle = new Paddle(this.borders);
@@ -158,6 +158,8 @@ export class Game {
                 this.pushBallFromTopBorder();
             } else if (this.checkBallCollisionWithBottomBorder()) {
                 this.loseLive();
+                window.requestAnimationFrame(this.nextStep);
+                return;
             }
 
             if (this.checkBallCollisionWithPaddle()) {

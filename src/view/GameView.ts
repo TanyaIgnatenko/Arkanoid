@@ -29,6 +29,7 @@ export class GameView {
     private _mouseEventNotifier: ObservableImpl<number> = new ObservableImpl<number>();
 
     private scorePositionBottomLeft: Vector2D = new Vector2D(15, 20);
+    private footerPositionBottomLeft: Vector2D;
     private livesCountPositionBottomLeft: Vector2D;
     private scoreTextWidth: number = 100;
     private scoreTextHeight: number = 16;
@@ -47,12 +48,15 @@ export class GameView {
             leftBorder: 0,
             rightBorder: this._width,
             topBorder: 30,
-            bottomBorder: this._height
+            bottomBorder: this._height - 20
         };
 
         this.ball = new BallView(this.context);
         this.paddle = new PaddleView(this.context);
         this.bricksGrid = new BricksGridView(this.context, this.BRICK_GRID_SIZE, this.BRICKS_START_POSITION);
+
+        this.footerPositionBottomLeft = new Vector2D(15, this._height - 7);
+        this.drawFooter();
 
         this.livesCountPositionBottomLeft = new Vector2D(this.borders.rightBorder - 65, 20);
 
@@ -97,6 +101,16 @@ export class GameView {
         document.addEventListener('keydown', this.keyDownHandler);
         document.addEventListener('keyup', this.keyUpHandler);
         document.addEventListener('mousemove', this.mouseMoveHandler);
+    }
+
+    drawFooter(): void {
+        this.context.fillStyle = 'rgba(36, 41, 46, 0.6)';
+        this.context.fillRect(0, this.borders.bottomBorder, this._width, this._height - this.borders.bottomBorder);
+        this.context.fillStyle = 'white';
+        this.context.font = '10px Arial, sans-serif';
+        this.context.fillText("Press 'ESC' to show menu",
+                              this.footerPositionBottomLeft.x,
+                              this.footerPositionBottomLeft.y);
     }
 
     get width(): number {
