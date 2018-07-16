@@ -16,6 +16,10 @@ export class PaddleView {
     }
 
     draw(topLeftPosition: Vector2D): void {
+        this.context.clearRect(this._lastTopLeftPosition.x,
+                               this._lastTopLeftPosition.y,
+                               this._width, this._height);
+
         this.context.fillStyle = this.COLOR;
         this.context.strokeStyle = "#765031";
         this.context.lineWidth = this.BORDER_WIDTH;

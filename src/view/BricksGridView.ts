@@ -32,6 +32,10 @@ export class BricksGridView {
     }
 
     draw(): void {
+        this.context.clearRect(this._startPosition.x,
+                               this._startPosition.y,
+                               this._width, this._height);
+
         this.context.strokeStyle = "#eeeeee";
         for (let row = 0; row < this.gridSize.rowCount; ++row) {
             for (let col = 0; col < this.gridSize.columnCount; ++col) {

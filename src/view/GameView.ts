@@ -56,27 +56,12 @@ export class GameView {
 
         this.livesCountPositionBottomLeft = new Vector2D(this.borders.rightBorder - 65, 20);
 
-        this._scoreChangeHandler = new ScoreChangeHandler(
-            score => {
-                this.context.clearRect(this.scorePositionBottomLeft.x,
-                                    this.scorePositionBottomLeft.y - this.scoreTextHeight,
-                                       this.scoreTextWidth, this.scoreTextHeight);
-                this.drawScore(score);
-            });
+        this._scoreChangeHandler = new ScoreChangeHandler(score => this.drawScore(score));
 
-        this._livesCountChangeHandler = new LivesCountChangeHandler(
-        livesCount => {
-            this.context.clearRect(this.livesCountPositionBottomLeft.x,
-                                this.livesCountPositionBottomLeft.y - this.livesCountTextHeight,
-                                   this.livesCountTextWidth, this.livesCountTextHeight);
-            this.drawLivesCount(livesCount);
-        });
+        this._livesCountChangeHandler = new LivesCountChangeHandler(livesCount => this.drawLivesCount(livesCount));
 
         this._ballPositionChangeHandler = new BallPositionChangeHandler(
             position => {
-                this.context.clearRect(this.ball.lastPosition.x - this.ball.radius,
-                                       this.ball.lastPosition.y - this.ball.radius,
-                                       2 * this.ball.radius, 2 * this.ball.radius);
                 this.ball.draw(position);
                 this.ball.lastPosition = position;
             }
@@ -84,9 +69,6 @@ export class GameView {
 
         this._paddlePositionChangeHandler = new PaddlePositionChangeHandler(
             topLeftPosition => {
-                this.context.clearRect(this.paddle.lastTopLeftPosition.x,
-                                       this.paddle.lastTopLeftPosition.y,
-                                       this.paddle.width, this.paddle.height);
                 this.paddle.draw(topLeftPosition);
                 this.paddle.lastTopLeftPosition = topLeftPosition;
             }
@@ -95,18 +77,12 @@ export class GameView {
         this._bricksGridChangeHandler = new BricksGridChangeHandler(
             destroyedBrickNumber => {
                 this.bricksGrid.destroyBrick(destroyedBrickNumber);
-                this.context.clearRect(this.bricksGrid.startPosition.x,
-                                       this.bricksGrid.startPosition.y,
-                                       this.bricksGrid.width, this.bricksGrid.height);
                 this.bricksGrid.draw();
             }
         );
 
         this._bricksGridRecoveryHandler = new BricksGridRecoveryHandler(
             () => {
-                this.context.clearRect(this.bricksGrid.startPosition.x,
-                    this.bricksGrid.startPosition.y,
-                    this.bricksGrid.width, this.bricksGrid.height);
                 this.bricksGrid.reanimateAllBricks();
                 this.bricksGrid.draw();
             }
@@ -132,12 +108,22 @@ export class GameView {
     }
 
     private drawScore(score: number): void {
+        this.context.clearRect(this.scorePositionBottomLeft.x,
+                            this.scorePositionBottomLeft.y - this.scoreTextHeight,
+                               this.scoreTextWidth, this.scoreTextHeight);
+
+        this.context.fillStyle = 'black';
+        this.context.fillRect();
         this.context.font = '16px Arial, sans-serif';
         this.context.fillStyle = 'white';
         this.context.fillText('Score: ' + score, this.scorePositionBottomLeft.x, this.scorePositionBottomLeft.y);
     }
 
     private drawLivesCount(livesCount: number): void {
+        this.context.clearRect(this.livesCountPositionBottomLeft.x,
+                            this.livesCountPositionBottomLeft.y - this.livesCountTextHeight,
+                               this.livesCountTextWidth, this.livesCountTextHeight);
+
         this.context.font = '16px Arial, sans-serif';
         this.context.fillStyle = 'white';
         this.context.fillText('Lives: ' + livesCount, this.livesCountPositionBottomLeft.x, this.livesCountPositionBottomLeft.y);

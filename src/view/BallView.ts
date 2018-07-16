@@ -16,6 +16,10 @@ export class BallView {
     }
 
     draw(position: Vector2D): void {
+        this.context.clearRect(this._lastPosition.x - this._radius,
+            this._lastPosition.y - this._radius,
+            2 * this._radius, 2 * this._radius);
+
         this.context.beginPath();
         this.context.arc(position.x, position.y, this._radius - this.BORDER_WIDTH, 0, 2 * Math.PI, false);
         this.context.fillStyle = this.COLOR;
