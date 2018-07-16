@@ -6,7 +6,7 @@ import {BricksGridView} from "./BricksGridView";
 
 export class GameView {
     readonly BRICK_GRID_SIZE: GridSize = {rowCount: 3, columnCount: 8};
-    readonly BRICKS_START_POSITION: Vector2D = new Vector2D(50, 40);
+    readonly BRICKS_START_POSITION: Vector2D = new Vector2D(50, 42);
 
     private canvas: HTMLCanvasElement;
     private context: CanvasRenderingContext2D;
@@ -28,7 +28,7 @@ export class GameView {
     private _keyboardEventNotifier: ObservableImpl<Key> = new ObservableImpl<Key>();
     private _mouseEventNotifier: ObservableImpl<number> = new ObservableImpl<number>();
 
-    private scorePositionBottomLeft: Vector2D = new Vector2D(8, 20);
+    private scorePositionBottomLeft: Vector2D = new Vector2D(15, 20);
     private livesCountPositionBottomLeft: Vector2D;
     private scoreTextWidth: number = 100;
     private scoreTextHeight: number = 16;
@@ -112,9 +112,9 @@ export class GameView {
                             this.scorePositionBottomLeft.y - this.scoreTextHeight,
                                this.scoreTextWidth, this.scoreTextHeight);
 
-        this.context.fillStyle = 'black';
-        this.context.fillRect();
-        this.context.font = '16px Arial, sans-serif';
+        this.context.fillStyle = 'rgba(36, 41, 46, 0.6)';
+        this.context.fillRect(0, 0, this._width/2, 30);
+        this.context.font = '14px Arial, sans-serif';
         this.context.fillStyle = 'white';
         this.context.fillText('Score: ' + score, this.scorePositionBottomLeft.x, this.scorePositionBottomLeft.y);
     }
@@ -124,7 +124,9 @@ export class GameView {
                             this.livesCountPositionBottomLeft.y - this.livesCountTextHeight,
                                this.livesCountTextWidth, this.livesCountTextHeight);
 
-        this.context.font = '16px Arial, sans-serif';
+        this.context.fillStyle =  'rgba(36, 41, 46, 0.6)';
+        this.context.fillRect(this._width/2, 0, this._width/2, 30);
+        this.context.font = '14px Arial, sans-serif';
         this.context.fillStyle = 'white';
         this.context.fillText('Lives: ' + livesCount, this.livesCountPositionBottomLeft.x, this.livesCountPositionBottomLeft.y);
     }
