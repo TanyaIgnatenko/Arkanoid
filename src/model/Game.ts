@@ -18,6 +18,8 @@ export class Game {
     private pointsChangeHandler: PointsChangeHandler;
     private brickCountChangeHandler: BricksCountChangeHandler;
     private brickDestructionHandler: BrickDestructionHandler;
+    private _pauseGameHandler: PauseGameHandler;
+    private _resumeGameHandler: ResumeGameHandler;
     private _keyboardEventHandler: KeyboardEventHandler;
     private _mouseEventHandler: MouseEventHandler;
 
@@ -29,6 +31,7 @@ export class Game {
     private _bricksGridRecoveryNotifier: ObservableImpl<void> = new ObservableImpl<void>();
 
     private gameFinished: boolean = false;
+    private gamePaused: boolean = false;
     private gameLost: boolean = false;
     private doesBallMove: Boolean = false;
 
@@ -82,6 +85,16 @@ export class Game {
                 this.paddle.topCenterPosition.x = mouseX;
             }
         );
+        this._pauseGameHandler = new PauseGameHandler(
+            () => {
+                this.pause();
+            }
+        );
+        this._resumeGameHandler = new ResumeGameHandler(
+            () => {
+                this.resume();
+            }
+        );
     }
 
     start() {
@@ -102,8 +115,13 @@ export class Game {
         window.requestAnimationFrame(this.nextStep);
     }
 
-    stop() {
+    pause() {
+        this.gamePaused = true;
+    }
 
+    resume() {
+        this.gamePaused = false;
+        window.requestAnimationFrame(this.nextStep);
     }
 
     restart() {
@@ -140,6 +158,8 @@ export class Game {
     }
 
     private nextStep(): void {
+        if(this.gamePaused) return;
+
         if (this.gameFinished) {
             if(this.gameLost) {
                 // alert('GAME OVER');
@@ -301,6 +321,14 @@ export class Game {
     get mouseEventHandler(): MouseEventHandler {
         return this._mouseEventHandler;
     }
+
+    get pauseGameHandler(): PauseGameHandler {
+        return this._pauseGameHandler;
+    }
+
+    get resumeGameHandler(): ResumeGameHandler {
+        return this._resumeGameHandler;
+    }
 }
 
 class PointsChangeHandler implements Observer<number> {
@@ -339,6 +367,30 @@ class BrickDestructionHandler implements Observer<BrickGridNumber> {
     }
 }
 
+class PauseGameHandler implements Observer<void> {
+    private onUpdate: () => void;
+
+    constructor(onUpdate: () => void) {
+        this.onUpdate = onUpdate;
+    }
+
+    update(): void {
+        this.onUpdate();
+    }
+}
+
+class ResumeGameHandler implements Observer<void> {
+    private onUpdate: () => void;
+
+    constructor(onUpdate: () => void) {
+        this.onUpdate = onUpdate;
+    }
+
+    update(): void {
+        this.onUpdate();
+    }
+}
+
 class KeyboardEventHandler implements Observer<Key> {
     private onUpdate: (Key) => void;
 
@@ -362,3 +414,4 @@ class MouseEventHandler implements Observer<number> {
         this.onUpdate(mouseX);
     }
 }
+

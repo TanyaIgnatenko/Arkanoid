@@ -17,6 +17,8 @@ gameModel.bricksGridRecoveryNotifier.subscribe(gameView.bricksGridRecoveryHandle
 
 gameView.keyboardEventNotifier.subscribe(gameModel.keyboardEventHandler);
 gameView.mouseEventNotifier.subscribe(gameModel.mouseEventHandler);
+gameView.pauseGameNotifier.subscribe(gameModel.pauseGameHandler);
+gameView.resumeGameNotifier.subscribe(gameModel.resumeGameHandler);
 
 gameModel.start();
 gameView.start();

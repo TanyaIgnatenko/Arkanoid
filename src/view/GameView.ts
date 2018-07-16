@@ -27,6 +27,8 @@ export class GameView {
 
     private _keyboardEventNotifier: ObservableImpl<Key> = new ObservableImpl<Key>();
     private _mouseEventNotifier: ObservableImpl<number> = new ObservableImpl<number>();
+    private _pauseGameNotifier: ObservableImpl<void> = new ObservableImpl<void>();
+    private _resumeGameNotifier: ObservableImpl<void> = new ObservableImpl<void>();
 
     private scorePositionBottomLeft: Vector2D = new Vector2D(15, 20);
     private footerPositionBottomLeft: Vector2D;
@@ -164,11 +166,19 @@ export class GameView {
         return this._bricksGridRecoveryHandler;
     }
 
+    drawMenu(): void {
+        this.context.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        this.context.fillRect(0, 0, this._width, this._height);
+    }
+
     keyDownHandler(e: KeyboardEvent): void {
         if (e.keyCode === 37) {
             this._keyboardEventNotifier.notify(Key.LeftArrow);
         } else if (e.keyCode === 39) {
             this._keyboardEventNotifier.notify(Key.RightArrow);
+        } else if(e.keyCode === 27) {
+            this._pauseGameNotifier.notify(null);
+            this.drawMenu();
         }
     }
 
@@ -192,6 +202,14 @@ export class GameView {
 
     get mouseEventNotifier(): Observable<number> {
         return this._mouseEventNotifier;
+    }
+
+    get pauseGameNotifier(): Observable<void> {
+        return this._pauseGameNotifier;
+    }
+
+    get resumeGameNotifier(): Observable<void> {
+        return this._resumeGameNotifier;
     }
 }
 
