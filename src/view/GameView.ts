@@ -3,6 +3,11 @@ import {PaddleView} from "./PaddleView";
 import {Observable, ObservableImpl, Observer} from "../model/Observer";
 import {BrickGridNumber, GridSize, Key, Vector2D} from "../model/Utils";
 import {BricksGridView} from "./BricksGridView";
+import {Layout} from "./Components/Layout";
+import {Padding} from "./Components/Padding";
+import {Button} from "./Components/Button";
+import {Text} from "./Components/Text";
+import {HorizontalAlignment} from "./Components/Alignment";
 
 export class GameView {
     readonly BRICK_GRID_SIZE: GridSize = {rowCount: 3, columnCount: 8};
@@ -37,6 +42,10 @@ export class GameView {
     private scoreTextHeight: number = 16;
     private livesCountTextWidth: number = 65;
     private livesCountTextHeight: number = 16;
+
+    private menu: Layout;
+    // private menuWidth = 350;
+    // private menuHeight = 170;
 
     private borders: { leftBorder: number, rightBorder: number, topBorder: number, bottomBorder: number };
 
@@ -93,6 +102,8 @@ export class GameView {
                 this.bricksGrid.draw();
             }
         );
+
+        this.createMenu();
     }
 
     start(): void {
@@ -166,9 +177,42 @@ export class GameView {
         return this._bricksGridRecoveryHandler;
     }
 
-    drawMenu(): void {
+    private createMenu() {
+        this.menu = new Layout(this.context);
+        this.menu.setPadding(new Padding(20, 20, 20, 20));
+
+        const resumeText = new Text(this.context, "Resume");
+        resumeText.setFontSize(30);
+        resumeText.setTextAlignment(HorizontalAlignment.Center);
+
+        const restartText = new Text(this.context, "Restart");
+        restartText.setFontSize(30);
+        restartText.setTextAlignment(HorizontalAlignment.Center);
+
+        const mainMenuText = new Text(this.context, "Main menu");
+        mainMenuText.setFontSize(30);
+        mainMenuText.setTextAlignment(HorizontalAlignment.Center);
+
+        let resumeButton = new Button(this.context, resumeText);
+        let restartButton = new Button(this.context, restartText);
+        let mainMenuButton = new Button(this.context, mainMenuText);
+
+        resumeButton.setBackgroundColor("yellow");
+        restartButton.setBackgroundColor("red");
+        mainMenuButton.setBackgroundColor("green");
+
+        this.menu.addComponent(resumeButton);
+        this.menu.addComponent(restartButton);
+        this.menu.addComponent(mainMenuButton);
+    }
+
+    private drawMenu(): void {
         this.context.fillStyle = 'rgba(0, 0, 0, 0.4)';
         this.context.fillRect(0, 0, this._width, this._height);
+        // this.context.fillStyle = 'rgba(36, 41, 46, 1)';
+
+        let menuTopLeftPoint = new Vector2D(175, 115);
+        this.menu.draw(menuTopLeftPoint);
     }
 
     keyDownHandler(e: KeyboardEvent): void {
