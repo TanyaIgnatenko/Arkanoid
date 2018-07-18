@@ -1,12 +1,17 @@
 import {BallView} from "./BallView";
 import {PaddleView} from "./PaddleView";
 import {Observable, ObservableImpl, Observer} from "../model/Observer";
-import {BrickGridNumber, GridSize, Key, Vector2D} from "../model/Utils";
+import {BrickGridNumber, GridSize, Key, Size, Vector2D} from "../model/Utils";
 import {BricksGridView} from "./BricksGridView";
+import {Layout} from "./Components/Layout";
+import {Padding} from "./Components/Padding";
+import {Button} from "./Components/Button";
+import {Text} from "./Components/Text";
+import {HorizontalAlignment} from "./Components/Alignment";
 
 export class GameView {
     readonly BRICK_GRID_SIZE: GridSize = {rowCount: 3, columnCount: 8};
-    readonly BRICKS_START_POSITION: Vector2D = new Vector2D(50, 40);
+    readonly BRICKS_START_POSITION: Vector2D = new Vector2D(50, 42);
 
     private canvas: HTMLCanvasElement;
     private context: CanvasRenderingContext2D;
@@ -27,13 +32,19 @@ export class GameView {
 
     private _keyboardEventNotifier: ObservableImpl<Key> = new ObservableImpl<Key>();
     private _mouseEventNotifier: ObservableImpl<number> = new ObservableImpl<number>();
+    private _pauseGameNotifier: ObservableImpl<void> = new ObservableImpl<void>();
+    private _resumeGameNotifier: ObservableImpl<void> = new ObservableImpl<void>();
 
-    private scorePositionBottomLeft: Vector2D = new Vector2D(8, 20);
+    private scorePositionBottomLeft: Vector2D = new Vector2D(15, 20);
+    private footerPositionBottomLeft: Vector2D;
     private livesCountPositionBottomLeft: Vector2D;
     private scoreTextWidth: number = 100;
     private scoreTextHeight: number = 16;
     private livesCountTextWidth: number = 65;
     private livesCountTextHeight: number = 16;
+
+    private menu: Layout;
+    private menuMode: boolean = false;
 
     private borders: { leftBorder: number, rightBorder: number, topBorder: number, bottomBorder: number };
 
@@ -47,36 +58,24 @@ export class GameView {
             leftBorder: 0,
             rightBorder: this._width,
             topBorder: 30,
-            bottomBorder: this._height
+            bottomBorder: this._height - 20
         };
 
         this.ball = new BallView(this.context);
         this.paddle = new PaddleView(this.context);
         this.bricksGrid = new BricksGridView(this.context, this.BRICK_GRID_SIZE, this.BRICKS_START_POSITION);
 
+        this.footerPositionBottomLeft = new Vector2D(15, this._height - 7);
+        this.drawFooter();
+
         this.livesCountPositionBottomLeft = new Vector2D(this.borders.rightBorder - 65, 20);
 
-        this._scoreChangeHandler = new ScoreChangeHandler(
-            score => {
-                this.context.clearRect(this.scorePositionBottomLeft.x,
-                                    this.scorePositionBottomLeft.y - this.scoreTextHeight,
-                                       this.scoreTextWidth, this.scoreTextHeight);
-                this.drawScore(score);
-            });
+        this._scoreChangeHandler = new ScoreChangeHandler(score => this.drawScore(score));
 
-        this._livesCountChangeHandler = new LivesCountChangeHandler(
-        livesCount => {
-            this.context.clearRect(this.livesCountPositionBottomLeft.x,
-                                this.livesCountPositionBottomLeft.y - this.livesCountTextHeight,
-                                   this.livesCountTextWidth, this.livesCountTextHeight);
-            this.drawLivesCount(livesCount);
-        });
+        this._livesCountChangeHandler = new LivesCountChangeHandler(livesCount => this.drawLivesCount(livesCount));
 
         this._ballPositionChangeHandler = new BallPositionChangeHandler(
             position => {
-                this.context.clearRect(this.ball.lastPosition.x - this.ball.radius,
-                                       this.ball.lastPosition.y - this.ball.radius,
-                                       2 * this.ball.radius, 2 * this.ball.radius);
                 this.ball.draw(position);
                 this.ball.lastPosition = position;
             }
@@ -84,9 +83,6 @@ export class GameView {
 
         this._paddlePositionChangeHandler = new PaddlePositionChangeHandler(
             topLeftPosition => {
-                this.context.clearRect(this.paddle.lastTopLeftPosition.x,
-                                       this.paddle.lastTopLeftPosition.y,
-                                       this.paddle.width, this.paddle.height);
                 this.paddle.draw(topLeftPosition);
                 this.paddle.lastTopLeftPosition = topLeftPosition;
             }
@@ -95,22 +91,18 @@ export class GameView {
         this._bricksGridChangeHandler = new BricksGridChangeHandler(
             destroyedBrickNumber => {
                 this.bricksGrid.destroyBrick(destroyedBrickNumber);
-                this.context.clearRect(this.bricksGrid.startPosition.x,
-                                       this.bricksGrid.startPosition.y,
-                                       this.bricksGrid.width, this.bricksGrid.height);
                 this.bricksGrid.draw();
             }
         );
 
         this._bricksGridRecoveryHandler = new BricksGridRecoveryHandler(
             () => {
-                this.context.clearRect(this.bricksGrid.startPosition.x,
-                    this.bricksGrid.startPosition.y,
-                    this.bricksGrid.width, this.bricksGrid.height);
                 this.bricksGrid.reanimateAllBricks();
                 this.bricksGrid.draw();
             }
         );
+
+        this.createMenu();
     }
 
     start(): void {
@@ -123,6 +115,16 @@ export class GameView {
         document.addEventListener('mousemove', this.mouseMoveHandler);
     }
 
+    drawFooter(): void {
+        this.context.fillStyle = 'rgba(36, 41, 46, 0.6)';
+        this.context.fillRect(0, this.borders.bottomBorder, this._width, this._height - this.borders.bottomBorder);
+        this.context.fillStyle = 'white';
+        this.context.font = '10px Arial, sans-serif';
+        this.context.fillText("Press 'ESC' to show menu",
+                              this.footerPositionBottomLeft.x,
+                              this.footerPositionBottomLeft.y);
+    }
+
     get width(): number {
         return this._width;
     }
@@ -132,13 +134,19 @@ export class GameView {
     }
 
     private drawScore(score: number): void {
-        this.context.font = '16px Arial, sans-serif';
+        this.context.clearRect(0, 0, this._width/2, 30);
+        this.context.fillStyle = 'rgba(36, 41, 46, 0.6)';
+        this.context.fillRect(0, 0, this._width/2, 30);
+        this.context.font = '14px Arial, sans-serif';
         this.context.fillStyle = 'white';
         this.context.fillText('Score: ' + score, this.scorePositionBottomLeft.x, this.scorePositionBottomLeft.y);
     }
 
     private drawLivesCount(livesCount: number): void {
-        this.context.font = '16px Arial, sans-serif';
+        this.context.clearRect(this._width/2, 0, this._width/2, 30);
+        this.context.fillStyle =  'rgba(36, 41, 46, 0.6)';
+        this.context.fillRect(this._width/2, 0, this._width/2, 30);
+        this.context.font = '14px Arial, sans-serif';
         this.context.fillStyle = 'white';
         this.context.fillText('Lives: ' + livesCount, this.livesCountPositionBottomLeft.x, this.livesCountPositionBottomLeft.y);
     }
@@ -168,11 +176,73 @@ export class GameView {
         return this._bricksGridRecoveryHandler;
     }
 
+    private createMenu() {
+        this.menu = new Layout(this.context);
+        this.menu.setBackgroundColor('rgba(36, 41, 46, 0.7)');
+        this.menu.setPadding(new Padding(20, 20, 20, 20));
+
+        const resumeText = new Text(this.context, "Resume");
+        resumeText.setFontSize(24);
+        resumeText.setTextAlignment(HorizontalAlignment.Center);
+        resumeText.setTextColor("#ffffff");
+
+        const restartText = new Text(this.context, "Restart");
+        restartText.setFontSize(24);
+        restartText.setTextAlignment(HorizontalAlignment.Center);
+        restartText.setTextColor("#ffffff");
+
+        const mainMenuText = new Text(this.context, "Main menu");
+        mainMenuText.setFontSize(24);
+        mainMenuText.setTextAlignment(HorizontalAlignment.Center);
+        mainMenuText.setTextColor("#ffffff");
+
+        const buttonPadding : Padding = new Padding(5, 10, 5, 10);
+        const buttonColor: string = 'rgba(36, 41, 46, 0)';
+        const buttonWidth : number = 350;
+
+        const resumeButton = new Button(this.context, resumeText);
+        resumeButton.setPadding(buttonPadding);
+        resumeButton.setPreferredWidth(buttonWidth);
+        resumeButton.setBackgroundColor(buttonColor);
+
+        const restartButton = new Button(this.context, restartText);
+        restartButton.setPadding(buttonPadding);
+        restartButton.setPreferredWidth(buttonWidth);
+        restartButton.setBackgroundColor(buttonColor);
+
+        const mainMenuButton = new Button(this.context, mainMenuText);
+        mainMenuButton.setPadding(buttonPadding);
+        mainMenuButton.setPreferredWidth(buttonWidth);
+        mainMenuButton.setBackgroundColor(buttonColor);
+
+        // resumeButton.setBackgroundColor("yellow");
+        // restartButton.setBackgroundColor("red");
+        // mainMenuButton.setBackgroundColor("green");
+
+        this.menu.addComponent(resumeButton);
+        this.menu.addComponent(restartButton);
+        this.menu.addComponent(mainMenuButton);
+    }
+
+    private drawMenu(): void {
+        this.context.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        this.context.fillRect(0, 0, this._width, this._height);
+        // this.context.fillStyle = 'rgba(36, 41, 46, 1)';
+
+        let menuTopLeftPoint = new Vector2D((this._width - this.menu.width())/2 ,
+                                                (this._height - this.menu.height())/2);
+        this.menu.draw(menuTopLeftPoint);
+    }
+
     keyDownHandler(e: KeyboardEvent): void {
         if (e.keyCode === 37) {
             this._keyboardEventNotifier.notify(Key.LeftArrow);
         } else if (e.keyCode === 39) {
             this._keyboardEventNotifier.notify(Key.RightArrow);
+        } else if(e.keyCode === 27 && !this.menuMode) {
+            this.menuMode = true;
+            this._pauseGameNotifier.notify(null);
+            this.drawMenu();
         }
     }
 
@@ -196,6 +266,14 @@ export class GameView {
 
     get mouseEventNotifier(): Observable<number> {
         return this._mouseEventNotifier;
+    }
+
+    get pauseGameNotifier(): Observable<void> {
+        return this._pauseGameNotifier;
+    }
+
+    get resumeGameNotifier(): Observable<void> {
+        return this._resumeGameNotifier;
     }
 }
 

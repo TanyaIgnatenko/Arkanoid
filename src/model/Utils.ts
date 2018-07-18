@@ -48,6 +48,11 @@ export class Vector2D {
     }
 }
 
+export interface Size {
+    width: number;
+    height: number;
+}
+
 export interface GridSize {
     rowCount: number;
     columnCount: number;
