@@ -6,16 +6,26 @@ export class Button implements Component {
     private context: CanvasRenderingContext2D;
     private internalComponent: Component;
     private padding: Padding = new Padding(0, 0, 0, 0);
-    private _width: number = this.padding.left + this.padding.right;
-    private _height: number = this.padding.top + this.padding.bottom;
     private backgroundColor: string = "black";
     private preferredWidth: number = 0;
+
+    private _width: number = this.padding.left + this.padding.right;
+    private _height: number = this.padding.top + this.padding.bottom;
+    private _onClick: () => void;
 
     constructor(context: CanvasRenderingContext2D, child: Component) {
         this.context = context;
         this.internalComponent = child;
 
         this.recalculateSize();
+    }
+
+    setOnClick(func: () => void) {
+        this._onClick = func;
+    }
+
+    onClick(): void {
+        this._onClick;
     }
 
     setBackgroundColor(color: string) {
@@ -30,6 +40,10 @@ export class Button implements Component {
     setPreferredWidth(preferredWidth: number) {
         this.preferredWidth = preferredWidth;
         if (preferredWidth > this._width) this._width = preferredWidth;
+    }
+
+    setTextColor() {
+
     }
 
     width(): number {

@@ -57,6 +57,7 @@ export class Layout implements Component {
 
     draw(topLeftPoint: Vector2D): void {
         this.context.save();
+        this.context.clearRect(topLeftPoint.x, topLeftPoint.y, this._width, this._height);
         this.context.fillStyle = this.backgroundColor;
         this.context.fillRect(topLeftPoint.x, topLeftPoint.y, this._width, this._height);
 
