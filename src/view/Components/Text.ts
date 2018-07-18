@@ -13,7 +13,6 @@ export class Text implements Component {
     private fontName: string;
     private fontSize: number;
     private textWidth: number;
-    private _height: number;
 
     constructor(context: CanvasRenderingContext2D, text: string) {
         this.context = context;
@@ -21,9 +20,10 @@ export class Text implements Component {
         this.padding = new Padding(0, 0, 0, 0);
         this.textAlignment = HorizontalAlignment.Left;
         this.textColor = "#000000";
-        this.fontFamily = "sans-serif";
-        this.fontName = "Arial";
-        this.fontSize = 16;
+        this.fontFamily = "sans serif";
+        this.fontName = "Coda Caption";
+        // this.fontName = "Arial";
+        this.fontSize = 14;
 
         this.recalculateWidth();
     }
@@ -73,9 +73,9 @@ export class Text implements Component {
         this.tuneFont();
         this.context.fillStyle = this.textColor;
 
-        this.context.textBaseline = "top";
         const x = topLeftPoint.x + this.textX();
         const y = topLeftPoint.y + this.padding.top;
+        this.context.textBaseline = "hanging";
         this.context.fillText(this.text, x, y);
 
         this.context.restore();

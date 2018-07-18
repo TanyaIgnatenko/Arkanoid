@@ -1,7 +1,7 @@
 import {BallView} from "./BallView";
 import {PaddleView} from "./PaddleView";
 import {Observable, ObservableImpl, Observer} from "../model/Observer";
-import {BrickGridNumber, GridSize, Key, Vector2D} from "../model/Utils";
+import {BrickGridNumber, GridSize, Key, Size, Vector2D} from "../model/Utils";
 import {BricksGridView} from "./BricksGridView";
 import {Layout} from "./Components/Layout";
 import {Padding} from "./Components/Padding";
@@ -44,8 +44,7 @@ export class GameView {
     private livesCountTextHeight: number = 16;
 
     private menu: Layout;
-    // private menuWidth = 350;
-    // private menuHeight = 170;
+    private menuMode: boolean = false;
 
     private borders: { leftBorder: number, rightBorder: number, topBorder: number, bottomBorder: number };
 
@@ -179,27 +178,46 @@ export class GameView {
 
     private createMenu() {
         this.menu = new Layout(this.context);
+        this.menu.setBackgroundColor('rgba(36, 41, 46, 0.7)');
         this.menu.setPadding(new Padding(20, 20, 20, 20));
 
         const resumeText = new Text(this.context, "Resume");
-        resumeText.setFontSize(30);
+        resumeText.setFontSize(24);
         resumeText.setTextAlignment(HorizontalAlignment.Center);
+        resumeText.setTextColor("#ffffff");
 
         const restartText = new Text(this.context, "Restart");
-        restartText.setFontSize(30);
+        restartText.setFontSize(24);
         restartText.setTextAlignment(HorizontalAlignment.Center);
+        restartText.setTextColor("#ffffff");
 
         const mainMenuText = new Text(this.context, "Main menu");
-        mainMenuText.setFontSize(30);
+        mainMenuText.setFontSize(24);
         mainMenuText.setTextAlignment(HorizontalAlignment.Center);
+        mainMenuText.setTextColor("#ffffff");
 
-        let resumeButton = new Button(this.context, resumeText);
-        let restartButton = new Button(this.context, restartText);
-        let mainMenuButton = new Button(this.context, mainMenuText);
+        const buttonPadding : Padding = new Padding(5, 10, 5, 10);
+        const buttonColor: string = 'rgba(36, 41, 46, 0)';
+        const buttonWidth : number = 350;
 
-        resumeButton.setBackgroundColor("yellow");
-        restartButton.setBackgroundColor("red");
-        mainMenuButton.setBackgroundColor("green");
+        const resumeButton = new Button(this.context, resumeText);
+        resumeButton.setPadding(buttonPadding);
+        resumeButton.setPreferredWidth(buttonWidth);
+        resumeButton.setBackgroundColor(buttonColor);
+
+        const restartButton = new Button(this.context, restartText);
+        restartButton.setPadding(buttonPadding);
+        restartButton.setPreferredWidth(buttonWidth);
+        restartButton.setBackgroundColor(buttonColor);
+
+        const mainMenuButton = new Button(this.context, mainMenuText);
+        mainMenuButton.setPadding(buttonPadding);
+        mainMenuButton.setPreferredWidth(buttonWidth);
+        mainMenuButton.setBackgroundColor(buttonColor);
+
+        // resumeButton.setBackgroundColor("yellow");
+        // restartButton.setBackgroundColor("red");
+        // mainMenuButton.setBackgroundColor("green");
 
         this.menu.addComponent(resumeButton);
         this.menu.addComponent(restartButton);
@@ -211,7 +229,8 @@ export class GameView {
         this.context.fillRect(0, 0, this._width, this._height);
         // this.context.fillStyle = 'rgba(36, 41, 46, 1)';
 
-        let menuTopLeftPoint = new Vector2D(175, 115);
+        let menuTopLeftPoint = new Vector2D((this._width - this.menu.width())/2 ,
+                                                (this._height - this.menu.height())/2);
         this.menu.draw(menuTopLeftPoint);
     }
 
@@ -220,7 +239,8 @@ export class GameView {
             this._keyboardEventNotifier.notify(Key.LeftArrow);
         } else if (e.keyCode === 39) {
             this._keyboardEventNotifier.notify(Key.RightArrow);
-        } else if(e.keyCode === 27) {
+        } else if(e.keyCode === 27 && !this.menuMode) {
+            this.menuMode = true;
             this._pauseGameNotifier.notify(null);
             this.drawMenu();
         }
