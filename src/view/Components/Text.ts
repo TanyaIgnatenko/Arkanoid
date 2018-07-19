@@ -22,7 +22,6 @@ export class Text implements Component {
         this.textColor = "#000000";
         this.fontFamily = "sans serif";
         this.fontName = "Coda Caption";
-        // this.fontName = "Arial";
         this.fontSize = 14;
 
         this.recalculateWidth();
@@ -56,11 +55,11 @@ export class Text implements Component {
         this.recalculateWidth();
     }
 
-    setTextColor(color: string): void {
+    setColor(color: string): void {
         this.textColor = color;
     }
 
-    setTextAlignment(alignment: HorizontalAlignment) : void {
+    setAlignment(alignment: HorizontalAlignment) : void {
         this.textAlignment = alignment;
     }
 
