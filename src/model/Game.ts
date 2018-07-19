@@ -20,6 +20,7 @@ export class Game {
     private brickDestructionHandler: BrickDestructionHandler;
     private _pauseGameHandler: PauseGameHandler;
     private _resumeGameHandler: ResumeGameHandler;
+    private _restartGameHandler: RestartGameHandler;
     private _keyboardEventHandler: KeyboardEventHandler;
     private _mouseEventHandler: MouseEventHandler;
 
@@ -95,6 +96,11 @@ export class Game {
                 this.resume();
             }
         );
+        this._restartGameHandler = new RestartGameHandler(
+            () => {
+                this.restart();
+            }
+        );
     }
 
     start() {
@@ -125,6 +131,7 @@ export class Game {
     }
 
     restart() {
+        this.gamePaused = false;
         this.gameFinished = false;
         this.gameLost = false;
         this.doesBallMove = false;
@@ -329,6 +336,10 @@ export class Game {
     get resumeGameHandler(): ResumeGameHandler {
         return this._resumeGameHandler;
     }
+
+    get restartGameHandler(): RestartGameHandler {
+        return this._restartGameHandler;
+    }
 }
 
 class PointsChangeHandler implements Observer<number> {
@@ -380,6 +391,18 @@ class PauseGameHandler implements Observer<void> {
 }
 
 class ResumeGameHandler implements Observer<void> {
+    private onUpdate: () => void;
+
+    constructor(onUpdate: () => void) {
+        this.onUpdate = onUpdate;
+    }
+
+    update(): void {
+        this.onUpdate();
+    }
+}
+
+class RestartGameHandler implements Observer<void> {
     private onUpdate: () => void;
 
     constructor(onUpdate: () => void) {

@@ -25,7 +25,7 @@ export class Button implements Component {
     }
 
     onClick(): void {
-        this._onClick;
+        this._onClick();
     }
 
     setBackgroundColor(color: string) {
@@ -40,10 +40,6 @@ export class Button implements Component {
     setPreferredWidth(preferredWidth: number) {
         this.preferredWidth = preferredWidth;
         if (preferredWidth > this._width) this._width = preferredWidth;
-    }
-
-    setTextColor() {
-
     }
 
     width(): number {

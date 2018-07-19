@@ -19,7 +19,7 @@ export class TextOption extends Button implements Option {
 
     constructor(name: Text, onChosen: () => void, context: CanvasRenderingContext2D, parent: Redrawer, isSelected: boolean) {
         super(context, name);
-        super.onClick = onChosen;
+        super.setOnClick(onChosen);
 
         this.name = name;
         this.parent = parent;
@@ -28,11 +28,11 @@ export class TextOption extends Button implements Option {
         this.notSelectedTextColor = "grey";
     }
 
-    choose() {
-        super.onClick();
+    choose(): void {
+        this.onClick();
     }
 
-    setSelected(value: boolean) {
+    setSelected(value: boolean): void {
         this.isSelected = value;
         if(this.isSelected) this.parent.requestRedraw(this);
     }
