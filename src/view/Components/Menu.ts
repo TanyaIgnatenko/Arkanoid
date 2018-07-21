@@ -13,6 +13,7 @@ export class Menu extends Layout implements Redrawer {
     private selectedOptionIdx: number;
     private activeOptionColor: string = "white";
     private notActiveOptionColor: string = "grey";
+    private isActive: boolean;
 
     constructor(context: CanvasRenderingContext2D, parent: Redrawer) {
         super(context);
@@ -21,8 +22,8 @@ export class Menu extends Layout implements Redrawer {
 
         this.parent = parent;
         this.selectedOptionIdx = 0;
+        this.isActive = false;
         this.keyDownHandler = this.keyDownHandler.bind(this);
-        document.addEventListener('keydown', this.keyDownHandler);
     }
 
     requestRedraw(child: Component) {
@@ -32,6 +33,15 @@ export class Menu extends Layout implements Redrawer {
     addOption(option: TextOption) {
         this.options.push(option);
         this.addComponent(option);
+    }
+
+    setIsActive(value: boolean) {
+        this.isActive = value;
+        if(this.isActive) {
+            document.addEventListener('keydown', this.keyDownHandler);
+        } else {
+            document.removeEventListener('keydown', this.keyDownHandler);
+        }
     }
 
     keyDownHandler(e: KeyboardEvent): void {

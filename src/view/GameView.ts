@@ -52,7 +52,7 @@ export class GameView implements Redrawer{
     private score: number;
 
     private menu: Menu;
-    // private mainMenu: Menu;
+    private mainMenu: Menu;
     private menuMode: boolean = false;
 
     private titleTopLeftPosition: Vector2D;
@@ -117,7 +117,7 @@ export class GameView implements Redrawer{
         );
 
         this.createMenu();
-        // this.createMainMenu();
+        this.createMainMenu();
     }
 
     private createMenu() {
@@ -144,6 +144,7 @@ export class GameView implements Redrawer{
 
         const onResume: () => void = () => {
             this.menuMode = false;
+            this.menu.setIsActive(false);
             this.context.clearRect(0, 0, this.width, this.height);
             this.draw();
             this._resumeGameNotifier.notify(null);
@@ -155,6 +156,7 @@ export class GameView implements Redrawer{
 
         const onRestart: () => void = () => {
             this.menuMode = false;
+            this.menu.setIsActive(false);
             this.context.clearRect(0, 0, this.width, this.height);
             this.draw();
             this._restartGameNotifier.notify(null);
@@ -169,117 +171,102 @@ export class GameView implements Redrawer{
         mainMenuOption.setPreferredWidth(buttonWidth);
         mainMenuOption.setBackgroundColor(buttonColor);
 
-        // resumeOption.setBackgroundColor("yellow");
-        // restartOption.setBackgroundColor("red");
-        // mainMenuOption.setBackgroundColor("green");
-
         this.menu.addOption(resumeOption);
         this.menu.addOption(restartOption);
         this.menu.addOption(mainMenuOption);
 
         const topLeftPoint: Vector2D = new Vector2D((this._width - this.menu.width())/2, (this.height - this.menu.height())/2);
         this.childs.set(this.menu, topLeftPoint);
+        console.log("initial topLeftPoint");
+        console.log(topLeftPoint);
     }
 
-    // createMainMenu(): void {
-    //     this.mainMenu = new Menu(this.context, this);
-    //     const padding: Padding = new Padding(100, 0, 100, 0);
-    //     this.mainMenu.setPadding(padding);
-    //
-    //     const newGameText = new Text(this.context, "New Game");
-    //     newGameText.setFontSize(26);
-    //     newGameText.setAlignment(HorizontalAlignment.Center);
-    //     newGameText.setColor("#ffffff");
-    //
-    //     const bestResultsText = new Text(this.context, "Best Results");
-    //     bestResultsText.setFontSize(26);
-    //     bestResultsText.setAlignment(HorizontalAlignment.Center);
-    //     bestResultsText.setColor("#ffffff");
-    //
-    //     const howToPlayText = new Text(this.context, "How to play");
-    //     howToPlayText.setFontSize(26);
-    //     howToPlayText.setAlignment(HorizontalAlignment.Center);
-    //     howToPlayText.setColor("#ffffff");
-    //
-    //     const settingsText = new Text(this.context, "Settings");
-    //     settingsText.setFontSize(26);
-    //     settingsText.setAlignment(HorizontalAlignment.Center);
-    //     settingsText.setColor("#ffffff");
-    //
-    //     const buttonPadding : Padding = new Padding(7, 10, 7, 10);
-    //     const buttonColor: string = 'rgba(36, 41, 46, 0)';
-    //     const buttonWidth : number = 350;
-    //
-    //     const onResume: () => void = () => {
-    //         this.context.clearRect(0, 0, this.width, this.height);
-    //         this.draw();
-    //         this._resumeGameNotifier.notify(null);
-    //     };
-    //     const newGameOption = new TextOption(newGameText, onResume, this.context, this.mainMenu, true);
-    //     newGameOption.setPadding(buttonPadding);
-    //     newGameOption.setPreferredWidth(buttonWidth);
-    //     newGameOption.setBackgroundColor(buttonColor);
-    //
-    //     const onRestart: () => void = () => {
-    //         this.context.clearRect(0, 0, this.width, this.height);
-    //         this.draw();
-    //         this._restartGameNotifier.notify(null);
-    //     };
-    //     const bestResultsOption = new TextOption(bestResultsText, ()=> {}, this.context, this.mainMenu, false);
-    //     bestResultsOption.setPadding(buttonPadding);
-    //     bestResultsOption.setPreferredWidth(buttonWidth);
-    //     bestResultsOption.setBackgroundColor(buttonColor);
-    //
-    //     const howToPlayOption = new TextOption(howToPlayText, ()=> {}, this.context, this.mainMenu, false);
-    //     howToPlayOption.setPadding(buttonPadding);
-    //     howToPlayOption.setPreferredWidth(buttonWidth);
-    //     howToPlayOption.setBackgroundColor(buttonColor);
-    //
-    //     const settingsOption = new TextOption(settingsText, ()=> {}, this.context, this.mainMenu, false);
-    //     settingsOption.setPadding(buttonPadding);
-    //     settingsOption.setPreferredWidth(buttonWidth);
-    //     settingsOption.setBackgroundColor(buttonColor);
-    //
-    //     // resumeOption.setBackgroundColor("yellow");
-    //     // restartOption.setBackgroundColor("red");
-    //     // mainMenuOption.setBackgroundColor("green");
-    //
-    //     this.mainMenu.addOption(newGameOption);
-    //     this.mainMenu.addOption(bestResultsOption);
-    //     this.mainMenu.addOption(howToPlayOption);
-    //     this.mainMenu.addOption(settingsOption);
-    //
-    //     const topLeftPoint: Vector2D = new Vector2D((this._width - this.mainMenu.width())/2, (this.height - this.mainMenu.height())/2);
-    //     this.childs.set(this.mainMenu, topLeftPoint);
-    // }
-    //
-    // drawMainMenu(): void {
-    //     this.menuMode = true;
-    //     this.context.clearRect(0, 0, this.width, this.height);
-    //     let menuTopLeftPoint = new Vector2D((this._width - this.mainMenu.width())/2 ,
-    //         (this._height - this.mainMenu.height())/2);
-    //     this.mainMenu.draw(menuTopLeftPoint);
-    //
-    //     const titleText = new Text(this.context, "Arkanoid");
-    //     titleText.setFontSize(36);
-    //     titleText.setAlignment(HorizontalAlignment.Center);
-    //     titleText.setColor("#ffffff");
-    //
-    //     this.titleTopLeftPosition = new Vector2D((this.width - titleText.width())/2, 60);
-    //
-    //     titleText.draw(this.titleTopLeftPosition);
-    //
-    //     // this.context.fillRect(this.width - )
-    // }
+    createMainMenu(): void {
+        this.mainMenu = new Menu(this.context, this);
+        const padding: Padding = new Padding(100, 0, 100, 0);
+        this.mainMenu.setPadding(padding);
+
+        const newGameText = new Text(this.context, "New Game");
+        newGameText.setFontSize(26);
+        newGameText.setAlignment(HorizontalAlignment.Center);
+        newGameText.setColor("#ffffff");
+
+        const bestResultsText = new Text(this.context, "Best Results");
+        bestResultsText.setFontSize(26);
+        bestResultsText.setAlignment(HorizontalAlignment.Center);
+        bestResultsText.setColor("#ffffff");
+
+        const howToPlayText = new Text(this.context, "How to play");
+        howToPlayText.setFontSize(26);
+        howToPlayText.setAlignment(HorizontalAlignment.Center);
+        howToPlayText.setColor("#ffffff");
+
+        const settingsText = new Text(this.context, "Settings");
+        settingsText.setFontSize(26);
+        settingsText.setAlignment(HorizontalAlignment.Center);
+        settingsText.setColor("#ffffff");
+
+        const buttonPadding : Padding = new Padding(7, 10, 7, 10);
+        const buttonColor: string = 'rgba(36, 41, 46, 0)';
+        const buttonWidth : number = 350;
+
+        const newGameOption = new TextOption(newGameText, () => {}, this.context, this.mainMenu, true);
+        newGameOption.setPadding(buttonPadding);
+        newGameOption.setPreferredWidth(buttonWidth);
+        newGameOption.setBackgroundColor(buttonColor);
+
+        const bestResultsOption = new TextOption(bestResultsText, ()=> {}, this.context, this.mainMenu, false);
+        bestResultsOption.setPadding(buttonPadding);
+        bestResultsOption.setPreferredWidth(buttonWidth);
+        bestResultsOption.setBackgroundColor(buttonColor);
+
+        const howToPlayOption = new TextOption(howToPlayText, ()=> {}, this.context, this.mainMenu, false);
+        howToPlayOption.setPadding(buttonPadding);
+        howToPlayOption.setPreferredWidth(buttonWidth);
+        howToPlayOption.setBackgroundColor(buttonColor);
+
+        const settingsOption = new TextOption(settingsText, ()=> {}, this.context, this.mainMenu, false);
+        settingsOption.setPadding(buttonPadding);
+        settingsOption.setPreferredWidth(buttonWidth);
+        settingsOption.setBackgroundColor(buttonColor);
+
+        this.mainMenu.addOption(newGameOption);
+        this.mainMenu.addOption(bestResultsOption);
+        this.mainMenu.addOption(howToPlayOption);
+        this.mainMenu.addOption(settingsOption);
+
+        const topLeftPoint: Vector2D = new Vector2D((this._width - this.mainMenu.width())/2, (this.height - this.mainMenu.height())/2);
+        this.childs.set(this.mainMenu, topLeftPoint);
+    }
+
+    drawMainMenu(): void {
+        this.menuMode = true;
+        this.context.clearRect(0, 0, this.width, this.height);
+        let menuTopLeftPoint = new Vector2D((this._width - this.mainMenu.width())/2 ,
+            (this._height - this.mainMenu.height())/2);
+        this.mainMenu.draw(menuTopLeftPoint);
+
+        const titleText = new Text(this.context, "Arkanoid");
+        titleText.setFontSize(36);
+        titleText.setAlignment(HorizontalAlignment.Center);
+        titleText.setColor("#ffffff");
+
+        this.titleTopLeftPosition = new Vector2D((this.width - titleText.width())/2, 60);
+        titleText.draw(this.titleTopLeftPosition);
+    }
 
     private drawMenu(): void {
         let menuTopLeftPoint = new Vector2D((this._width - this.menu.width())/2 ,
             (this._height - this.menu.height())/2);
+        console.log("topLeftPoint in draw");
+        console.log(menuTopLeftPoint);
         this.menu.draw(menuTopLeftPoint);
     }
 
     requestRedraw(child: Component): void {
+        console.log(child);
         const topLeftPoint: Vector2D = this.childs.get(child);
+        console.log(topLeftPoint);
         child.draw(topLeftPoint);
     }
 
@@ -291,8 +278,6 @@ export class GameView implements Redrawer{
         document.addEventListener('keydown', this.keyDownHandler);
         document.addEventListener('keyup', this.keyUpHandler);
         document.addEventListener('mousemove', this.mouseMoveHandler);
-        // this._pauseGameNotifier.notify(null);
-        // this.drawMainMenu();
     }
 
     drawFooter(): void {
@@ -379,6 +364,7 @@ export class GameView implements Redrawer{
             this._keyboardEventNotifier.notify(Key.RightArrow);
         } else if(e.keyCode === 27 && !this.menuMode) {
             this.menuMode = true;
+            this.menu.setIsActive(true);
             this._pauseGameNotifier.notify(null);
             this.darkenBackground();
             this.drawMenu();
