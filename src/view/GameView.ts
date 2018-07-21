@@ -59,7 +59,6 @@ export class GameView implements Redrawer{
 
     private childs = new Map();
 
-
     private borders: { leftBorder: number, rightBorder: number, topBorder: number, bottomBorder: number };
 
     constructor(canvas: HTMLCanvasElement) {
@@ -144,6 +143,7 @@ export class GameView implements Redrawer{
 
         const onResume: () => void = () => {
             this.menuMode = false;
+
             this.menu.setIsActive(false);
             this.context.clearRect(0, 0, this.width, this.height);
             this.draw();
@@ -166,7 +166,14 @@ export class GameView implements Redrawer{
         restartOption.setPreferredWidth(buttonWidth);
         restartOption.setBackgroundColor(buttonColor);
 
-        const mainMenuOption = new TextOption(mainMenuText, ()=> {}, this.context, this.menu, false);
+        const onMainMenu: () => void = () => {
+            this.menuMode = false;
+            this.menu.setIsActive(false);
+            this.mainMenu.setIsActive(true);
+            this.context.clearRect(0, 0, this.width, this.height);
+            this.drawMainMenu();
+        };
+        const mainMenuOption = new TextOption(mainMenuText, onMainMenu, this.context, this.menu, false);
         mainMenuOption.setPadding(buttonPadding);
         mainMenuOption.setPreferredWidth(buttonWidth);
         mainMenuOption.setBackgroundColor(buttonColor);
@@ -177,8 +184,6 @@ export class GameView implements Redrawer{
 
         const topLeftPoint: Vector2D = new Vector2D((this._width - this.menu.width())/2, (this.height - this.menu.height())/2);
         this.childs.set(this.menu, topLeftPoint);
-        console.log("initial topLeftPoint");
-        console.log(topLeftPoint);
     }
 
     createMainMenu(): void {
@@ -258,15 +263,11 @@ export class GameView implements Redrawer{
     private drawMenu(): void {
         let menuTopLeftPoint = new Vector2D((this._width - this.menu.width())/2 ,
             (this._height - this.menu.height())/2);
-        console.log("topLeftPoint in draw");
-        console.log(menuTopLeftPoint);
         this.menu.draw(menuTopLeftPoint);
     }
 
     requestRedraw(child: Component): void {
-        console.log(child);
         const topLeftPoint: Vector2D = this.childs.get(child);
-        console.log(topLeftPoint);
         child.draw(topLeftPoint);
     }
 
