@@ -1,4 +1,4 @@
-import {Vector2D} from "../../model/Utils";
+import {Vector2D} from "../../Utils/Utils";
 import {Component} from "./Component";
 import {Text} from "./Text";
 import {Button} from "./Button";

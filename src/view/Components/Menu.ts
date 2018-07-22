@@ -1,7 +1,7 @@
 import {Layout} from "./Layout";
 import {Padding} from "./Padding";
 import {Component} from "./Component";
-import {Vector2D} from "../../model/Utils";
+import {Vector2D} from "../../Utils/Utils";
 import {Redrawer} from "./Redrawer";
 import {Option, TextOption} from "./Option";
 
