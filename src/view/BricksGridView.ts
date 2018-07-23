@@ -1,4 +1,4 @@
-import {GridSize, Vector2D} from "../model/Utils";
+import {GridSize, Vector2D} from "../Utils/Utils";
 import Brick from "../model/Brick";
 import {BrickView} from "./BrickView";
 

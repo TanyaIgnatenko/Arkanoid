@@ -2,8 +2,8 @@ import {Button} from "./Components/Button";
 import {TextOption} from "./Components/Option";
 import {BallView} from "./BallView";
 import {PaddleView} from "./PaddleView";
-import {Observable, ObservableImpl, Observer} from "../model/Observer";
-import {BrickGridNumber, GridSize, Key, Size, Vector2D} from "../model/Utils";
+import {Observable, Notifier, Observer} from "../Utils/Observer";
+import {BrickGridNumber, GridSize, Key, Size, Vector2D} from "../Utils/Utils";
 import {BricksGridView} from "./BricksGridView";
 import {Layout} from "./Components/Layout";
 import {Padding} from "./Components/Padding";
@@ -12,8 +12,9 @@ import {HorizontalAlignment} from "./Components/Alignment";
 import {Menu} from "./Components/Menu";
 import {Component} from "./Components/Component";
 import {Redrawer} from "./Components/Redrawer";
+import {Game} from "../model/Game";
 
-export class GameView implements Redrawer{
+export class GameView implements Redrawer {
     readonly BRICK_GRID_SIZE: GridSize = {rowCount: 3, columnCount: 8};
     readonly BRICKS_START_POSITION: Vector2D = new Vector2D(50, 42);
 
@@ -25,7 +26,8 @@ export class GameView implements Redrawer{
 
     private ball: BallView = new BallView(this.context);
     private paddle: PaddleView = new PaddleView(this.context);
-    private bricksGrid: BricksGridView = new BricksGridView(this.context, this.BRICK_GRID_SIZE, this.BRICKS_START_POSITION);
+    private bricksGrid: BricksGridView = new BricksGridView(this.context, this.BRICK_GRID_SIZE,
+                                                            this.BRICKS_START_POSITION);
 
     private _ballPositionChangeHandler: BallPositionChangeHandler;
     private _paddlePositionChangeHandler: PaddlePositionChangeHandler;
@@ -34,11 +36,8 @@ export class GameView implements Redrawer{
     private _livesCountChangeHandler: LivesCountChangeHandler;
     private _bricksGridRecoveryHandler: BricksGridRecoveryHandler;
 
-    private _keyboardEventNotifier: ObservableImpl<Key> = new ObservableImpl<Key>();
-    private _mouseEventNotifier: ObservableImpl<number> = new ObservableImpl<number>();
-    private _pauseGameNotifier: ObservableImpl<void> = new ObservableImpl<void>();
-    private _resumeGameNotifier: ObservableImpl<void> = new ObservableImpl<void>();
-    private _restartGameNotifier: ObservableImpl<void> = new ObservableImpl<void>();
+    private _keyboardEventNotifier: Notifier<Key> = new Notifier<Key>();
+    private _mouseEventNotifier: Notifier<number> = new Notifier<number>();
 
     private scorePositionBottomLeft: Vector2D = new Vector2D(15, 20);
     private footerPositionBottomLeft: Vector2D;
@@ -50,18 +49,17 @@ export class GameView implements Redrawer{
 
     private livesCount: number;
     private score: number;
-
     private menu: Menu;
     private mainMenu: Menu;
     private menuMode: boolean = false;
-
     private titleTopLeftPosition: Vector2D;
-
     private childs = new Map();
+    private gameModel: Game;
 
     private borders: { leftBorder: number, rightBorder: number, topBorder: number, bottomBorder: number };
 
-    constructor(canvas: HTMLCanvasElement) {
+    constructor(canvas: HTMLCanvasElement, gameModel: Game) {
+        this.gameModel = gameModel;
         this.canvas = canvas;
         this.context = this.canvas.getContext('2d');
         this._width = this.canvas.width;
@@ -119,6 +117,25 @@ export class GameView implements Redrawer{
         this.createMainMenu();
     }
 
+    start(): void {
+        this.nextFrame();
+    }
+
+    nextFrame():void {
+        this.gameModel.nextStep();
+        window.requestAnimationFrame(this.nextFrame.bind(this));
+    }
+
+    showMenu(): void {
+        if(!this.menuMode) {
+            this.menuMode = true;
+            this.menu.setIsActive(true);
+            this.gameModel.pause();
+            this.darkenBackground();
+            this.drawMenu();
+        }
+    }
+
     private createMenu() {
         this.menu = new Menu(this.context, this);
 
@@ -147,7 +164,7 @@ export class GameView implements Redrawer{
             this.menu.setIsActive(false);
             this.context.clearRect(0, 0, this.width, this.height);
             this.draw();
-            this._resumeGameNotifier.notify(null);
+            this.gameModel.resume();
         };
         const resumeOption = new TextOption(resumeText, onResume.bind(this), this.context, this.menu, true);
         resumeOption.setPadding(buttonPadding);
@@ -159,7 +176,7 @@ export class GameView implements Redrawer{
             this.menu.setIsActive(false);
             this.context.clearRect(0, 0, this.width, this.height);
             this.draw();
-            this._restartGameNotifier.notify(null);
+            this.gameModel.restart();
         };
         const restartOption = new TextOption(restartText, onRestart.bind(this), this.context, this.menu, false);
         restartOption.setPadding(buttonPadding);
@@ -182,7 +199,7 @@ export class GameView implements Redrawer{
         this.menu.addOption(restartOption);
         this.menu.addOption(mainMenuOption);
 
-        const topLeftPoint: Vector2D = new Vector2D((this._width - this.menu.width())/2, (this.height - this.menu.height())/2);
+        const topLeftPoint: Vector2D = new Vector2D((this._width - this.menu.width()) / 2, (this.height - this.menu.height()) / 2);
         this.childs.set(this.menu, topLeftPoint);
     }
 
@@ -211,26 +228,30 @@ export class GameView implements Redrawer{
         settingsText.setAlignment(HorizontalAlignment.Center);
         settingsText.setColor("#ffffff");
 
-        const buttonPadding : Padding = new Padding(7, 10, 7, 10);
+        const buttonPadding: Padding = new Padding(7, 10, 7, 10);
         const buttonColor: string = 'rgba(36, 41, 46, 0)';
-        const buttonWidth : number = 350;
+        const buttonWidth: number = 350;
 
-        const newGameOption = new TextOption(newGameText, () => {}, this.context, this.mainMenu, true);
+        const newGameOption = new TextOption(newGameText, () => {
+        }, this.context, this.mainMenu, true);
         newGameOption.setPadding(buttonPadding);
         newGameOption.setPreferredWidth(buttonWidth);
         newGameOption.setBackgroundColor(buttonColor);
 
-        const bestResultsOption = new TextOption(bestResultsText, ()=> {}, this.context, this.mainMenu, false);
+        const bestResultsOption = new TextOption(bestResultsText, () => {
+        }, this.context, this.mainMenu, false);
         bestResultsOption.setPadding(buttonPadding);
         bestResultsOption.setPreferredWidth(buttonWidth);
         bestResultsOption.setBackgroundColor(buttonColor);
 
-        const howToPlayOption = new TextOption(howToPlayText, ()=> {}, this.context, this.mainMenu, false);
+        const howToPlayOption = new TextOption(howToPlayText, () => {
+        }, this.context, this.mainMenu, false);
         howToPlayOption.setPadding(buttonPadding);
         howToPlayOption.setPreferredWidth(buttonWidth);
         howToPlayOption.setBackgroundColor(buttonColor);
 
-        const settingsOption = new TextOption(settingsText, ()=> {}, this.context, this.mainMenu, false);
+        const settingsOption = new TextOption(settingsText, () => {
+        }, this.context, this.mainMenu, false);
         settingsOption.setPadding(buttonPadding);
         settingsOption.setPreferredWidth(buttonWidth);
         settingsOption.setBackgroundColor(buttonColor);
@@ -240,15 +261,15 @@ export class GameView implements Redrawer{
         this.mainMenu.addOption(howToPlayOption);
         this.mainMenu.addOption(settingsOption);
 
-        const topLeftPoint: Vector2D = new Vector2D((this._width - this.mainMenu.width())/2, (this.height - this.mainMenu.height())/2);
+        const topLeftPoint: Vector2D = new Vector2D((this._width - this.mainMenu.width()) / 2, (this.height - this.mainMenu.height()) / 2);
         this.childs.set(this.mainMenu, topLeftPoint);
     }
 
     drawMainMenu(): void {
         this.menuMode = true;
         this.context.clearRect(0, 0, this.width, this.height);
-        let menuTopLeftPoint = new Vector2D((this._width - this.mainMenu.width())/2 ,
-            (this._height - this.mainMenu.height())/2);
+        let menuTopLeftPoint = new Vector2D((this._width - this.mainMenu.width()) / 2,
+            (this._height - this.mainMenu.height()) / 2);
         this.mainMenu.draw(menuTopLeftPoint);
 
         const titleText = new Text(this.context, "Arkanoid");
@@ -256,29 +277,19 @@ export class GameView implements Redrawer{
         titleText.setAlignment(HorizontalAlignment.Center);
         titleText.setColor("#ffffff");
 
-        this.titleTopLeftPosition = new Vector2D((this.width - titleText.width())/2, 60);
+        this.titleTopLeftPosition = new Vector2D((this.width - titleText.width()) / 2, 60);
         titleText.draw(this.titleTopLeftPosition);
     }
 
     private drawMenu(): void {
-        let menuTopLeftPoint = new Vector2D((this._width - this.menu.width())/2 ,
-            (this._height - this.menu.height())/2);
+        let menuTopLeftPoint = new Vector2D((this._width - this.menu.width()) / 2,
+            (this._height - this.menu.height()) / 2);
         this.menu.draw(menuTopLeftPoint);
     }
 
     requestRedraw(child: Component): void {
         const topLeftPoint: Vector2D = this.childs.get(child);
         child.draw(topLeftPoint);
-    }
-
-    start(): void {
-        this.mouseMoveHandler = this.mouseMoveHandler.bind(this);
-        this.keyUpHandler = this.keyUpHandler.bind(this);
-        this.keyDownHandler = this.keyDownHandler.bind(this);
-
-        document.addEventListener('keydown', this.keyDownHandler);
-        document.addEventListener('keyup', this.keyUpHandler);
-        document.addEventListener('mousemove', this.mouseMoveHandler);
     }
 
     drawFooter(): void {
@@ -301,9 +312,9 @@ export class GameView implements Redrawer{
 
     private drawScore(score: number): void {
         this.score = score;
-        this.context.clearRect(0, 0, this._width/2, 30);
+        this.context.clearRect(0, 0, this._width / 2, 30);
         this.context.fillStyle = 'rgba(36, 41, 46, 0.6)';
-        this.context.fillRect(0, 0, this._width/2, 30);
+        this.context.fillRect(0, 0, this._width / 2, 30);
         this.context.font = '14px Arial, sans-serif';
         this.context.fillStyle = 'white';
         this.context.fillText('Score: ' + score, this.scorePositionBottomLeft.x, this.scorePositionBottomLeft.y);
@@ -311,12 +322,13 @@ export class GameView implements Redrawer{
 
     private drawLivesCount(livesCount: number): void {
         this.livesCount = livesCount;
-        this.context.clearRect(this._width/2, 0, this._width/2, 30);
-        this.context.fillStyle =  'rgba(36, 41, 46, 0.6)';
-        this.context.fillRect(this._width/2, 0, this._width/2, 30);
+        this.context.clearRect(this._width / 2, 0, this._width / 2, 30);
+        this.context.fillStyle = 'rgba(36, 41, 46, 0.6)';
+        this.context.fillRect(this._width / 2, 0, this._width / 2, 30);
         this.context.font = '14px Arial, sans-serif';
         this.context.fillStyle = 'white';
-        this.context.fillText('Lives: ' + livesCount, this.livesCountPositionBottomLeft.x, this.livesCountPositionBottomLeft.y);
+        this.context.fillText('Lives: ' + livesCount, this.livesCountPositionBottomLeft.x,
+                                                      this.livesCountPositionBottomLeft.y);
     }
 
 
@@ -358,52 +370,12 @@ export class GameView implements Redrawer{
         this.context.fillRect(0, 0, this._width, this._height);
     }
 
-    keyDownHandler(e: KeyboardEvent): void {
-        if (e.keyCode === 37) {
-            this._keyboardEventNotifier.notify(Key.LeftArrow);
-        } else if (e.keyCode === 39) {
-            this._keyboardEventNotifier.notify(Key.RightArrow);
-        } else if(e.keyCode === 27 && !this.menuMode) {
-            this.menuMode = true;
-            this.menu.setIsActive(true);
-            this._pauseGameNotifier.notify(null);
-            this.darkenBackground();
-            this.drawMenu();
-        }
-    }
-
-    keyUpHandler(e: KeyboardEvent): void {
-        if (e.keyCode === 37 || e.keyCode === 39) {
-            this._keyboardEventNotifier.notify(Key.None);
-        }
-    }
-
-    mouseMoveHandler(e: MouseEvent) {
-        let mouseX: number = e.clientX - this.context.canvas.offsetLeft;
-        if (mouseX >= this.borders.leftBorder + this.paddle.width / 2 &&
-            mouseX <= this.borders.rightBorder - this.paddle.width / 2) {
-            this._mouseEventNotifier.notify(mouseX);
-        }
-    }
-
     get keyboardEventNotifier(): Observable<Key> {
         return this._keyboardEventNotifier;
     }
 
     get mouseEventNotifier(): Observable<number> {
         return this._mouseEventNotifier;
-    }
-
-    get pauseGameNotifier(): Observable<void> {
-        return this._pauseGameNotifier;
-    }
-
-    get resumeGameNotifier(): Observable<void> {
-        return this._resumeGameNotifier;
-    }
-
-    get restartGameNotifier(): Observable<void> {
-        return this._restartGameNotifier;
     }
 }
 

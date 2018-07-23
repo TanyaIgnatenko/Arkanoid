@@ -1,7 +1,7 @@
-import {BrickGridNumber, CollisionType, GridSize, Vector2D} from "./Utils";
+import {BrickGridNumber, CollisionType, GridSize, Vector2D} from "../Utils/Utils";
 import Brick from "./Brick";
 import Ball from "./Ball";
-import {Observable, ObservableImpl} from "./Observer";
+import {Observable, Notifier} from "../Utils/Observer";
 
 export default class BrickGrid {
     private startPosition: Vector2D;
@@ -9,9 +9,9 @@ export default class BrickGrid {
     private bricks: Array<Array<Brick>> = new Array<Array<Brick>>();
     private _bricksLeftCount: number;
 
-    private _pointsChangeNotifier: ObservableImpl<number> = new ObservableImpl<number>();
-    private _bricksCountChangeNotifier: ObservableImpl<number> = new ObservableImpl<number>();
-    private _brickDestructionNotifier: ObservableImpl<BrickGridNumber> = new ObservableImpl<BrickGridNumber>();
+    private _pointsChangeNotifier: Notifier<number> = new Notifier<number>();
+    private _bricksCountChangeNotifier: Notifier<number> = new Notifier<number>();
+    private _brickDestructionNotifier: Notifier<BrickGridNumber> = new Notifier<BrickGridNumber>();
 
     constructor(startPosition: Vector2D, gridSize: GridSize) {
         this.startPosition = startPosition;

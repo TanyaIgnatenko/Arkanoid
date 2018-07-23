@@ -1,4 +1,4 @@
-import {Vector2D} from "../model/Utils";
+import {Vector2D} from "../Utils/Utils";
 
 
 export class BrickView {
