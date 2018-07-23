@@ -7,7 +7,7 @@ export interface Observable<T> {
     unsubscribe(subscriber: Observer<T>): void
 }
 
-export class ObservableImpl<T> implements Observable<T> {
+export class Notifier<T> implements Observable<T> {
     private subscribers: Set<Observer<T>> = new Set<Observer<T>>();
 
     subscribe(subscriber: Observer<T>): void {

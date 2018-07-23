@@ -1,6 +1,6 @@
 import {Component} from "./Component";
 import {Padding} from "./Padding";
-import {Vector2D} from "../../model/Utils";
+import {Vector2D} from "../../Utils/Utils";
 
 export class Button implements Component {
     private context: CanvasRenderingContext2D;

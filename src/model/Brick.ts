@@ -1,4 +1,4 @@
-import {CollisionType, Segment, Vector2D} from "./Utils";
+import {CollisionType, Segment, Vector2D} from "../Utils/Utils";
 import Ball from "./Ball";
 
 export default class Brick {

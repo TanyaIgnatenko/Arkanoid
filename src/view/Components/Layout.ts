@@ -1,5 +1,5 @@
 import {Component} from "./Component";
-import {Vector2D} from "../../model/Utils";
+import {Vector2D} from "../../Utils/Utils";
 import {Padding} from "./Padding";
 import {HorizontalAlignment} from "./Alignment";
 

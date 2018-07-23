@@ -1,8 +1,9 @@
 import Ball from "./Ball";
 import Paddle from "./Paddle";
 import BrickGrid from "./BrickGrid";
-import {BrickGridNumber, Direction, GridSize, Key, Vector2D} from "./Utils";
-import {Observable, ObservableImpl, Observer} from "./Observer";
+import {BrickGridNumber, Direction, GridSize, Key, Vector2D} from "../Utils/Utils";
+import {Observable, Notifier, Observer} from "../Utils/Observer";
+import {EventHandler} from "../Utils/EventHandler";
 
 export class Game {
     readonly BRICK_GRID_SIZE: GridSize = {rowCount: 3, columnCount: 8};
@@ -15,21 +16,19 @@ export class Game {
     private paddle: Paddle;
     private bricks: BrickGrid = new BrickGrid(this.BRICKS_START_POSITION, this.BRICK_GRID_SIZE);
 
-    private pointsChangeHandler: PointsChangeHandler;
-    private brickCountChangeHandler: BricksCountChangeHandler;
-    private brickDestructionHandler: BrickDestructionHandler;
-    private _pauseGameHandler: PauseGameHandler;
-    private _resumeGameHandler: ResumeGameHandler;
-    private _restartGameHandler: RestartGameHandler;
-    private _keyboardEventHandler: KeyboardEventHandler;
-    private _mouseEventHandler: MouseEventHandler;
+    private pointsChangeHandler: EventHandler<number>;
+    private brickCountChangeHandler: EventHandler<number>;
+    private brickDestructionHandler: EventHandler<BrickGridNumber>;
 
-    private _ballPositionChangeNotifier: ObservableImpl<Vector2D> = new ObservableImpl<Vector2D>();
-    private _paddlePositionChangeNotifier: ObservableImpl<Vector2D> = new ObservableImpl<Vector2D>();
-    private _bricksGridChangeNotifier: ObservableImpl<BrickGridNumber> = new ObservableImpl<BrickGridNumber>();
-    private _livesCountChangeNotifier: ObservableImpl<number> = new ObservableImpl<number>();
-    private _scoreChangeNotifier: ObservableImpl<number> = new ObservableImpl<number>();
-    private _bricksGridRecoveryNotifier: ObservableImpl<void> = new ObservableImpl<void>();
+    private _keyboardEventHandler: EventHandler<Key>;
+    private _mouseEventHandler: EventHandler<number>;
+
+    private _ballPositionChangeNotifier: Notifier<Vector2D> = new Notifier<Vector2D>();
+    private _paddlePositionChangeNotifier: Notifier<Vector2D> = new Notifier<Vector2D>();
+    private _bricksGridChangeNotifier: Notifier<BrickGridNumber> = new Notifier<BrickGridNumber>();
+    private _livesCountChangeNotifier: Notifier<number> = new Notifier<number>();
+    private _scoreChangeNotifier: Notifier<number> = new Notifier<number>();
+    private _bricksGridRecoveryNotifier: Notifier<void> = new Notifier<void>();
 
     private gameFinished: boolean = false;
     private gamePaused: boolean = false;
@@ -49,24 +48,23 @@ export class Game {
 
         this.paddle = new Paddle(this.borders);
 
-        this.pointsChangeHandler = new PointsChangeHandler(
+        this.pointsChangeHandler = new EventHandler<number>(
             pointsAdded => this.addPoints(pointsAdded)
         );
-        this.brickCountChangeHandler = new BricksCountChangeHandler(
+        this.brickCountChangeHandler = new EventHandler<number>(
             bricksLeftCount => {
                 this.checkWinCondition();
             }
         );
-        this.brickDestructionHandler = new BrickDestructionHandler(
+        this.brickDestructionHandler = new EventHandler<BrickGridNumber>(
             brickGridNumber => {
                 this._bricksGridChangeNotifier.notify(brickGridNumber);
             }
         );
-        this._keyboardEventHandler = new KeyboardEventHandler(
+        this._keyboardEventHandler = new EventHandler<Key>(
             key => {
                 let direction;
-                switch(key)
-                {
+                switch(key) {
                     case Key.RightArrow:
                         direction = Direction.Right;
                         break;
@@ -81,24 +79,9 @@ export class Game {
                 this.paddle.direction = direction;
             }
         );
-        this._mouseEventHandler = new MouseEventHandler(
+        this._mouseEventHandler = new EventHandler<number>(
             mouseX => {
                 this.paddle.topCenterPosition.x = mouseX;
-            }
-        );
-        this._pauseGameHandler = new PauseGameHandler(
-            () => {
-                this.pause();
-            }
-        );
-        this._resumeGameHandler = new ResumeGameHandler(
-            () => {
-                this.resume();
-            }
-        );
-        this._restartGameHandler = new RestartGameHandler(
-            () => {
-                this.restart();
             }
         );
     }
@@ -116,9 +99,6 @@ export class Game {
         this._ballPositionChangeNotifier.notify(this.ball.position);
         this._paddlePositionChangeNotifier.notify(this.paddle.topLeftPosition);
         this._bricksGridRecoveryNotifier.notify(null);
-
-        document.addEventListener('mouseup', this.mouseUpHandler);
-        window.requestAnimationFrame(this.nextStep);
     }
 
     pause() {
@@ -127,7 +107,6 @@ export class Game {
 
     resume() {
         this.gamePaused = false;
-        window.requestAnimationFrame(this.nextStep);
     }
 
     restart() {
@@ -152,10 +131,21 @@ export class Game {
         this._ballPositionChangeNotifier.notify(this.ball.position);
         this._paddlePositionChangeNotifier.notify(this.paddle.topLeftPosition);
         this._bricksGridRecoveryNotifier.notify(null);
+    }
 
-        document.addEventListener("mouseup", this.mouseUpHandler);
+    setPaddleDirection(direction: Direction): void {
+        this.paddle.direction = direction;
+    }
 
-        window.requestAnimationFrame(this.nextStep);
+    setPaddleX(x: number): void {
+        x = Math.max(x, this.paddle.width/2);
+        x = Math.min(x, this.borders.rightBorder - this.paddle.width/2);
+        const newPosition: Vector2D = new Vector2D(x, this.paddle.topCenterPosition.y);
+        this.paddle.topCenterPosition = newPosition;
+    }
+
+    releaseBall(): void {
+        this.doesBallMove = true;
     }
 
     private subscribeToBricksGridEvents() {
@@ -164,7 +154,7 @@ export class Game {
         this.bricks.brickDestructionNotifier.subscribe(this.brickDestructionHandler);
     }
 
-    private nextStep(): void {
+    nextStep(): void {
         if(this.gamePaused) return;
 
         if (this.gameFinished) {
@@ -185,7 +175,6 @@ export class Game {
                 this.pushBallFromTopBorder();
             } else if (this.checkBallCollisionWithBottomBorder()) {
                 this.loseLive();
-                window.requestAnimationFrame(this.nextStep);
                 return;
             }
 
@@ -205,8 +194,6 @@ export class Game {
             this.setBallPositionToPaddleTopCenter();
             this._ballPositionChangeNotifier.notify(this.ball.position);
         }
-
-        window.requestAnimationFrame(this.nextStep);
     }
 
     private setBallInitialPosition(): void {
@@ -269,7 +256,6 @@ export class Game {
         this.ball.reset();
 
         this.doesBallMove = false;
-        document.addEventListener('mouseup', this.mouseUpHandler);
     }
 
     private checkWinCondition(): void {
@@ -321,120 +307,11 @@ export class Game {
         return this._bricksGridRecoveryNotifier;
     }
 
-    get keyboardEventHandler(): KeyboardEventHandler {
+    get keyboardEventHandler(): EventHandler<Key> {
         return this._keyboardEventHandler;
     }
 
-    get mouseEventHandler(): MouseEventHandler {
+    get mouseEventHandler(): EventHandler<number> {
         return this._mouseEventHandler;
     }
-
-    get pauseGameHandler(): PauseGameHandler {
-        return this._pauseGameHandler;
-    }
-
-    get resumeGameHandler(): ResumeGameHandler {
-        return this._resumeGameHandler;
-    }
-
-    get restartGameHandler(): RestartGameHandler {
-        return this._restartGameHandler;
-    }
 }
-
-class PointsChangeHandler implements Observer<number> {
-    private onUpdate: (number) => void;
-
-    constructor(onUpdate: (number) => void) {
-        this.onUpdate = onUpdate;
-    }
-
-    update(pointsAdded: number): void {
-        this.onUpdate(pointsAdded);
-    }
-}
-
-class BricksCountChangeHandler implements Observer<number> {
-    private onUpdate: (number) => void;
-
-    constructor(onUpdate: (number) => void) {
-        this.onUpdate = onUpdate;
-    }
-
-    update(bricksLeftCount: number): void {
-        this.onUpdate(bricksLeftCount);
-    }
-}
-
-class BrickDestructionHandler implements Observer<BrickGridNumber> {
-    private onUpdate: (BrickGridNumber) => void;
-
-    constructor(onUpdate: (BrickGridNumber) => void) {
-        this.onUpdate = onUpdate;
-    }
-
-    update(brickGridNumber: BrickGridNumber): void {
-        this.onUpdate(brickGridNumber);
-    }
-}
-
-class PauseGameHandler implements Observer<void> {
-    private onUpdate: () => void;
-
-    constructor(onUpdate: () => void) {
-        this.onUpdate = onUpdate;
-    }
-
-    update(): void {
-        this.onUpdate();
-    }
-}
-
-class ResumeGameHandler implements Observer<void> {
-    private onUpdate: () => void;
-
-    constructor(onUpdate: () => void) {
-        this.onUpdate = onUpdate;
-    }
-
-    update(): void {
-        this.onUpdate();
-    }
-}
-
-class RestartGameHandler implements Observer<void> {
-    private onUpdate: () => void;
-
-    constructor(onUpdate: () => void) {
-        this.onUpdate = onUpdate;
-    }
-
-    update(): void {
-        this.onUpdate();
-    }
-}
-
-class KeyboardEventHandler implements Observer<Key> {
-    private onUpdate: (Key) => void;
-
-    constructor(onUpdate: (Key) => void) {
-        this.onUpdate = onUpdate;
-    }
-
-    update(pressedKey: Key): void {
-        this.onUpdate(pressedKey);
-    }
-}
-
-class MouseEventHandler implements Observer<number> {
-    private onUpdate: (number) => void;
-
-    constructor(onUpdate: (number) => void) {
-        this.onUpdate = onUpdate;
-    }
-
-    update(mouseX: number): void {
-        this.onUpdate(mouseX);
-    }
-}
-

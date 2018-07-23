@@ -1,4 +1,4 @@
-import {Direction, Vector2D} from "./Utils";
+import {Direction, Vector2D} from "../Utils/Utils";
 
 export default class Paddle {
     readonly SPEED_X: number = 10;

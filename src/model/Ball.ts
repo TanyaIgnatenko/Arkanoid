@@ -1,4 +1,4 @@
-import {SphericalObject, Vector2D} from "./Utils";
+import {SphericalObject, Vector2D} from "../Utils/Utils";
 
 export default class Ball implements SphericalObject {
     readonly RADIUS: number = 10;
