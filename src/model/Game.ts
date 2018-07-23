@@ -64,8 +64,7 @@ export class Game {
         this._keyboardEventHandler = new EventHandler<Key>(
             key => {
                 let direction;
-                switch(key)
-                {
+                switch(key) {
                     case Key.RightArrow:
                         direction = Direction.Right;
                         break;
@@ -100,9 +99,6 @@ export class Game {
         this._ballPositionChangeNotifier.notify(this.ball.position);
         this._paddlePositionChangeNotifier.notify(this.paddle.topLeftPosition);
         this._bricksGridRecoveryNotifier.notify(null);
-
-        document.addEventListener('mouseup', this.mouseUpHandler);
-        window.requestAnimationFrame(this.nextStep);
     }
 
     pause() {
@@ -111,7 +107,6 @@ export class Game {
 
     resume() {
         this.gamePaused = false;
-        window.requestAnimationFrame(this.nextStep);
     }
 
     restart() {
@@ -136,10 +131,6 @@ export class Game {
         this._ballPositionChangeNotifier.notify(this.ball.position);
         this._paddlePositionChangeNotifier.notify(this.paddle.topLeftPosition);
         this._bricksGridRecoveryNotifier.notify(null);
-
-        document.addEventListener("mouseup", this.mouseUpHandler);
-
-        window.requestAnimationFrame(this.nextStep);
     }
 
     setPaddleDirection(direction: Direction): void {
@@ -151,6 +142,10 @@ export class Game {
         x = Math.min(x, this.borders.rightBorder - this.paddle.width/2);
         const newPosition: Vector2D = new Vector2D(x, this.paddle.topCenterPosition.y);
         this.paddle.topCenterPosition = newPosition;
+    }
+
+    releaseBall(): void {
+        this.doesBallMove = true;
     }
 
     private subscribeToBricksGridEvents() {
@@ -261,7 +256,6 @@ export class Game {
         this.ball.reset();
 
         this.doesBallMove = false;
-        document.addEventListener('mouseup', this.mouseUpHandler);
     }
 
     private checkWinCondition(): void {

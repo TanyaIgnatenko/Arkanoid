@@ -17,9 +17,6 @@ gameModel.livesCountChangeNotifier.subscribe(gameView.livesCountChangeHandler);
 gameModel.scoreChangeNotifier.subscribe(gameView.scoreChangeHandler);
 gameModel.bricksGridRecoveryNotifier.subscribe(gameView.bricksGridRecoveryHandler);
 
-gameView.keyboardEventNotifier.subscribe(gameModel.keyboardEventHandler);
-gameView.mouseEventNotifier.subscribe(gameModel.mouseEventHandler);
-
 gameModel.start();
 gameView.start();
 userInputController.start();

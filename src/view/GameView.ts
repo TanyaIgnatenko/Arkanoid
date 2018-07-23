@@ -36,9 +36,6 @@ export class GameView implements Redrawer {
     private _livesCountChangeHandler: LivesCountChangeHandler;
     private _bricksGridRecoveryHandler: BricksGridRecoveryHandler;
 
-    private _keyboardEventNotifier: Notifier<Key> = new Notifier<Key>();
-    private _mouseEventNotifier: Notifier<number> = new Notifier<number>();
-
     private scorePositionBottomLeft: Vector2D = new Vector2D(15, 20);
     private footerPositionBottomLeft: Vector2D;
     private livesCountPositionBottomLeft: Vector2D;
@@ -368,14 +365,6 @@ export class GameView implements Redrawer {
     private darkenBackground(): void {
         this.context.fillStyle = 'rgba(0, 0, 0, 0.4)';
         this.context.fillRect(0, 0, this._width, this._height);
-    }
-
-    get keyboardEventNotifier(): Observable<Key> {
-        return this._keyboardEventNotifier;
-    }
-
-    get mouseEventNotifier(): Observable<number> {
-        return this._mouseEventNotifier;
     }
 }
 

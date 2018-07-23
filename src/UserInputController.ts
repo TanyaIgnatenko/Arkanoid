@@ -36,12 +36,22 @@ export class UserInputController {
     }
 
     keyDownHandler(e: KeyboardEvent): void {
-        if (e.keyCode === this.LEFT_ARROW_KEY_CODE) {
-            this.gameModel.setPaddleDirection(Direction.Left);
-        } else if (e.keyCode === this.RIGHT_ARROW_KEY_CODE) {
-            this.gameModel.setPaddleDirection(Direction.Right);
-        } else if (e.keyCode === this.ESCAPE_KEY_CODE) {
-            this.gameView.showMenu();
+        switch(e.keyCode) {
+            case this.LEFT_ARROW_KEY_CODE:
+                this.gameModel.setPaddleDirection(Direction.Left);
+                break;
+
+            case this.RIGHT_ARROW_KEY_CODE:
+                this.gameModel.setPaddleDirection(Direction.Right);
+                break;
+
+            case this.ESCAPE_KEY_CODE:
+                this.gameView.showMenu();
+                break;
+
+            case this.SPACE_KEY_CODE:
+                this.gameModel.releaseBall();
+                break;
         }
     }
 
