@@ -221,7 +221,7 @@ export class Game {
     }
 
     private checkBallCollisionWithBottomBorder(): boolean {
-        return this.ball.position.y >= this.borders.bottomBorder - this.ball.radius;
+        return this.ball.position.y + this.ball.velocity.y > this.borders.bottomBorder - this.ball.radius;
     }
 
     private checkBallCollisionWithSideBorders(): boolean {
@@ -230,7 +230,7 @@ export class Game {
     }
 
     private checkBallCollisionWithTopBorder(): boolean {
-        return this.ball.position.y < this.borders.topBorder + this.ball.radius;
+        return this.ball.position.y + this.ball.velocity.y < this.borders.topBorder + this.ball.radius;
     }
 
     private pushBallFromSideBorders(): void {
