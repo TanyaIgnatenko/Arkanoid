@@ -168,6 +168,10 @@ export class Game {
         }
 
         if (this.doesBallMove) {
+            if (this.checkBallCollisionWithPaddle()) {
+                this.pushBallFromPaddle();
+            }
+
             if (this.checkBallCollisionWithSideBorders()) {
                 this.pushBallFromSideBorders();
             }
@@ -176,10 +180,6 @@ export class Game {
             } else if (this.checkBallCollisionWithBottomBorder()) {
                 this.loseLive();
                 return;
-            }
-
-            if (this.checkBallCollisionWithPaddle()) {
-                this.pushBallFromPaddle();
             }
 
             this.bricks.checkBallCollisions(this.ball);
