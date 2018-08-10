@@ -1,5 +1,5 @@
 .idea
 *.js
 !webpack.config.js
-node_modules/
+node_modules
 
